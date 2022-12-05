@@ -1,0 +1,7 @@
+argparse
+beautifulsoup4
+blinker
+pylru
+python-magic
+pyzmq
+requests
