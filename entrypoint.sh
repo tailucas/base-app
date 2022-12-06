@@ -31,8 +31,6 @@ chown "${APP_USER}:${APP_GROUP}" /opt/app/*
 chown -R "${APP_USER}:${APP_GROUP}" /data/
 # logging
 chown "${APP_USER}" /var/log/
-# home
-chown -R "${APP_USER}:${APP_GROUP}" "/home/${APP_USER}/"
 
 # Bash history
 echo "export HISTFILE=/data/.bash_history" >> /etc/bash.bashrc
