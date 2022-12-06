@@ -8,7 +8,7 @@ help:
 
 setup: docker-compose.template
 	@echo "Generating docker-compose.yml"
-	python3 pylib/cred_tool ENV $(APP) | python3 pylib/yaml_interpol services/app/environment docker-compose.template > docker-compose.yml
+	python3 pylib/cred_tool ENV.$(APP) $(APP) | python3 pylib/yaml_interpol services/app/environment docker-compose.template > docker-compose.yml
 
 pydeps:
 	python -m pip install --upgrade pip
