@@ -41,8 +41,6 @@ COPY requirements.txt .
 COPY pylib/requirements.txt ./pylib/requirements.txt
 COPY app_setup.sh .
 RUN /opt/app/app_setup.sh
-COPY hivemind_setup.sh .
-RUN /opt/app/hivemind_setup.sh
 
 COPY config ./config
 COPY entrypoint.sh .
