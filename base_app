@@ -99,7 +99,7 @@ if __name__ == "__main__":
     # back to INFO logging
     log.setLevel(logging.INFO)
     try:
-        log.info('Starting application threads...')
+        log.info(f'Working directory is [{os.getcwd()}]. Starting application threads...')
         event_processor.start()
         data_reader.start()
         # start thread nanny
