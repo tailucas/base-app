@@ -1,9 +1,4 @@
 FROM debian:buster
-ENV INITSYSTEM on
-ENV container docker
-
-LABEL Description="base_app" Vendor="tglucas" Version="1.0"
-
 ENV DEBIAN_FRONTEND noninteractive
 ENV DEBCONF_NONINTERACTIVE_SEEN true
 
@@ -40,12 +35,14 @@ RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommend
 # python3 default
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 
-# setup
+# app setup
 WORKDIR /opt/app
 COPY requirements.txt .
 COPY pylib/requirements.txt ./pylib/requirements.txt
 COPY app_setup.sh .
 RUN /opt/app/app_setup.sh
+COPY hivemind_setup.sh .
+RUN /opt/app/hivemind_setup.sh
 
 COPY config ./config
 COPY entrypoint.sh .
@@ -53,6 +50,18 @@ COPY pylib ./pylib
 COPY pylib/pylib ./lib
 COPY base_app .
 
+# create group ID 1024 for external volume permissions
+RUN groupadd -f -r -g 1024 app
+# create run-as user
+RUN useradd -r -g app app
+# user permissions
+RUN adduser app audio
+RUN chown app:app /opt/app/
+RUN chown app /var/log/
+
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
+
+# switch to user
+USER app
 CMD ["/opt/app/entrypoint.sh"]

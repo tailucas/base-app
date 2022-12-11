@@ -6,6 +6,14 @@ all: help
 help:
 	@echo "Depends on 1Password Connect Server: https://developer.1password.com/docs/connect/get-started"
 
+user:
+	id -g app || groupadd -f -r -g 1024 app
+	id -u app || useradd -r -g app app
+	mkdir -p ./data/
+	sudo chown app:1024 ./data/
+	sudo chmod 755 ./data/
+	sudo chmod g+s ./data/
+
 setup: docker-compose.template
 	@echo "Generating docker-compose.yml"
 	python3 pylib/cred_tool ENV.$(APP) $(APP) | python3 pylib/yaml_interpol services/app/environment docker-compose.template > docker-compose.yml
@@ -18,7 +26,6 @@ pydeps:
 	python -m pip install --upgrade -r "./pylib/requirements.txt"
 
 build:
-	sudo chown $(USER) data/.*
 	docker-compose build
 
 run:

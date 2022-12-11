@@ -2,6 +2,7 @@
 import logging.handlers
 
 import builtins
+import os
 import threading
 import zmq
 
@@ -103,7 +104,9 @@ if __name__ == "__main__":
         data_reader.start()
         # start thread nanny
         nanny.start()
-        log.info('Startup complete.')
+        env_vars = list(os.environ)
+        env_vars.sort()
+        log.info(f'Startup complete with {len(env_vars)} environment variables visible: {env_vars}.')
         # hang around until something goes wrong
         threads.interruptable_sleep.wait()
         raise RuntimeWarning("Shutting down...")
