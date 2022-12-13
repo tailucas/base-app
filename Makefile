@@ -16,7 +16,9 @@ user:
 
 setup: docker-compose.template
 	@echo "Generating docker-compose.yml"
-	python3 pylib/cred_tool ENV.$(APP) $(APP) | python3 pylib/yaml_interpol services/app/environment docker-compose.template > docker-compose.yml
+	cat docker-compose.template | sed "s~__DOCKER_HOSTNAME__~$(DOCKER_APP)~g" > docker-compose.template2
+	python3 pylib/cred_tool ENV.$(APP) $(APP) | python3 pylib/yaml_interpol services/app/environment docker-compose.template2 > docker-compose.yml
+	rm -f docker-compose.template2
 
 pydeps:
 	python -m pip install --upgrade pip
