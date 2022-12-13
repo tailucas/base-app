@@ -39,6 +39,8 @@ RUN update-alternatives --install /usr/bin/python python /usr/bin/python3 1
 WORKDIR /opt/app
 COPY requirements.txt .
 COPY pylib/requirements.txt ./pylib/requirements.txt
+COPY base_setup.sh .
+RUN /opt/app/base_setup.sh
 COPY app_setup.sh .
 RUN /opt/app/app_setup.sh
 
