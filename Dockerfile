@@ -58,6 +58,9 @@ RUN useradd -r -g app app
 RUN adduser app audio
 RUN chown app:app /opt/app/
 RUN chown app /var/log/
+# used by pip
+RUN mkdir -p /home/app
+RUN chown app:app /home/app/
 
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
