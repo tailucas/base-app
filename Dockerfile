@@ -50,10 +50,10 @@ COPY pylib ./pylib
 COPY pylib/pylib ./lib
 COPY base_app .
 
-# create group ID 999 for external volume permissions
+# create group ID for external volume permissions
 RUN groupadd -f -r -g 999 app
 # create run-as user
-RUN useradd -r -g 999 app
+RUN useradd -r -u 999 -g 999 app
 # user permissions
 RUN adduser app audio
 RUN chown app /opt/app/
