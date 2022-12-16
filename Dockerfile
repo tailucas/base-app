@@ -50,17 +50,17 @@ COPY pylib ./pylib
 COPY pylib/pylib ./lib
 COPY base_app .
 
-# create group ID 1024 for external volume permissions
-RUN groupadd -f -r -g 1024 app
+# create group ID 999 for external volume permissions
+RUN groupadd -f -r -g 999 app
 # create run-as user
-RUN useradd -r -g app app
+RUN useradd -r -g 999 app
 # user permissions
 RUN adduser app audio
-RUN chown app:app /opt/app/
+RUN chown app /opt/app/
 RUN chown app /var/log/
 # used by pip
 RUN mkdir -p /home/app
-RUN chown app:app /home/app/
+RUN chown app /home/app/
 
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
