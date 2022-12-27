@@ -45,7 +45,9 @@ COPY app_setup.sh .
 RUN /opt/app/app_setup.sh
 
 COPY config ./config
+COPY base_entrypoint.sh .
 COPY entrypoint.sh .
+COPY healthchecks_heartbeat.sh .
 COPY pylib ./pylib
 COPY pylib/pylib ./lib
 COPY base_app .
