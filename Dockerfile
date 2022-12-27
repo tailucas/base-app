@@ -5,6 +5,7 @@ ENV DEBCONF_NONINTERACTIVE_SEEN true
 RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
     ca-certificates \
+    cron \
     curl \
     dbus \
     html-xml-utils \
@@ -27,6 +28,7 @@ RUN apt-get clean && apt-get update && apt-get install -y --no-install-recommend
     rsyslog \
     strace \
     sqlite3 \
+    supervisor \
     tree \
     unzip \
     vim \
@@ -60,13 +62,17 @@ RUN useradd -r -u 999 -g 999 app
 RUN adduser app audio
 RUN chown app /opt/app/
 RUN chown app /var/log/
+# cron
+RUN chmod u+s /usr/sbin/cron
+# heartbeat
+ADD config/healthchecks_heartbeat /etc/cron.d/healthchecks_heartbeat
+RUN crontab -u app /etc/cron.d/healthchecks_heartbeat
+RUN chmod 0600 /etc/cron.d/healthchecks_heartbeat
 # used by pip
 RUN mkdir -p /home/app
 RUN chown app /home/app/
-
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
-
 # switch to user
 USER app
 CMD ["/opt/app/entrypoint.sh"]
