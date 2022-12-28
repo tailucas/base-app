@@ -48,6 +48,7 @@ RUN /opt/app/app_setup.sh
 
 COPY config ./config
 COPY base_entrypoint.sh .
+COPY app_entrypoint.sh .
 COPY entrypoint.sh .
 COPY healthchecks_heartbeat.sh .
 COPY pylib ./pylib
@@ -68,9 +69,11 @@ RUN chmod u+s /usr/sbin/cron
 ADD config/healthchecks_heartbeat /etc/cron.d/healthchecks_heartbeat
 RUN crontab -u app /etc/cron.d/healthchecks_heartbeat
 RUN chmod 0600 /etc/cron.d/healthchecks_heartbeat
-# used by pip
+# used by pip, awscli
 RUN mkdir -p /home/app
-RUN chown app /home/app/
+RUN mkdir -p /home/app/.aws/
+RUN chown -R app /home/app/
+
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
 # switch to user
