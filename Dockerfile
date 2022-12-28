@@ -73,6 +73,8 @@ RUN chmod 0600 /etc/cron.d/healthchecks_heartbeat
 RUN mkdir -p /home/app
 RUN mkdir -p /home/app/.aws/
 RUN chown -R app /home/app/
+# access to nVidia hardware
+RUN usermod -a -G video app
 
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
