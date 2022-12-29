@@ -12,5 +12,7 @@ command=/usr/sbin/cron -f
 autorestart=unexpected
 EOF
 printenv >> /opt/app/cron.env
-# AWS configuration (no tee for secrets)
-cat /opt/app/config/aws-config | /opt/app/pylib/config_interpol > "/home/${APP_USER}/.aws/config"
+if [ -n "${AWS_DEFAULT_REGION:-}" ]; then
+  # AWS configuration (no tee for secrets)
+  cat /opt/app/config/aws-config | /opt/app/pylib/config_interpol > "/home/${APP_USER}/.aws/config"
+fi
