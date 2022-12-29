@@ -10,9 +10,10 @@ curl https://sh.rustup.rs -sSf | sh -s -- -y
 source $HOME/.cargo/env
 
 # virtual-env updates
-
-python -m venv --system-site-packages /opt/app/
+python -m venv /opt/app/
 . /opt/app/bin/activate
+# output site configuration
+python -m site
 # work around timeouts to www.piwheels.org
 export PIP_DEFAULT_TIMEOUT=60
 python -m pip install --upgrade pip
