@@ -69,6 +69,9 @@ RUN chmod 0600 /etc/cron.d/healthchecks_heartbeat
 RUN mkdir -p /home/app
 RUN mkdir -p /home/app/.aws/
 RUN chown -R app /home/app/
+# volume permissions
+RUN mkdir /data
+RUN chown app /data/
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
 # switch to user
