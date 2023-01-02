@@ -2,7 +2,6 @@ version: "3.8"
 services:
   app:
     build: .
-    restart: no
     logging:
       driver: syslog
     tmpfs:
