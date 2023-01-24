@@ -29,6 +29,7 @@ pydeps:
 	python -m pip install --upgrade -r "./pylib/requirements.txt"
 
 build:
+	sudo rm -f ./data/app-std* ./data/cron-std* ./data/supervisord.sock
 	docker-compose build
 
 run:

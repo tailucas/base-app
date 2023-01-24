@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env sh
 set -eu
 set -o pipefail
 
@@ -7,7 +7,7 @@ cat /opt/app/config/supervisord.conf | /opt/app/pylib/config_interpol > /opt/app
 # cron
 cat << EOF >> /opt/app/supervisord.conf
 [program:cron]
-command=/usr/sbin/cron -f
+command=/usr/sbin/crond -f
 autorestart=unexpected
 EOF
 printenv >> /opt/app/cron.env
