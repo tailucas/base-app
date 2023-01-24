@@ -33,8 +33,6 @@ RUN addgroup app audio
 RUN addgroup app video
 # used by pip, awscli
 RUN mkdir -p /home/app/.aws/
-# cron
-RUN mkdir -p /home/app/crontabs/
 # file system permissions
 RUN chown app /var/log/
 RUN chown app:app /opt/app/
