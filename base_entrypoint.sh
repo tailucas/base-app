@@ -7,7 +7,7 @@ cat /opt/app/config/supervisord.conf | /opt/app/pylib/config_interpol > /opt/app
 # cron
 cat << EOF >> /opt/app/supervisord.conf
 [program:cron]
-command=/usr/sbin/crond -f
+command=/usr/sbin/crond -f -l 8
 autorestart=unexpected
 EOF
 printenv >> /opt/app/cron.env
