@@ -10,7 +10,6 @@ cat << EOF >> /opt/app/supervisord.conf
 command=/usr/sbin/crond -f -l 8
 autorestart=unexpected
 EOF
-printenv >> /opt/app/cron.env
 if [ -n "${AWS_DEFAULT_REGION:-}" ]; then
   # AWS configuration (no tee for secrets)
   cat /opt/app/config/aws-config | /opt/app/pylib/config_interpol > "/home/app/.aws/config"
