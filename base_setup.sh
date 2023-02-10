@@ -2,6 +2,8 @@
 set -e
 
 # system updates
+curl -sSL https://install.python-poetry.org | python3 -
+poetry --version
 
 # virtual-env updates
 python -m venv /opt/app/
