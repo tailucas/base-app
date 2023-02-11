@@ -6,6 +6,9 @@ authors = ["Tai Lucas <tglucas@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 
+[tool.poetry.scripts]
+app = "app.__main__:main"
+
 [tool.poetry.dependencies]
 python = "^3.10"
 pyzmq = "^25.0.0"

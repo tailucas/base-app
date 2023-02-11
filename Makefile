@@ -21,16 +21,9 @@ setup: docker-compose.template
 	python3 pylib/cred_tool ENV.$(APP) $(APP) | python3 pylib/yaml_interpol services/app/environment docker-compose.template2 > docker-compose.yml
 	rm -f docker-compose.template2
 
-pydeps:
-	python -m pip install --upgrade pip
-	python -m pip install --upgrade setuptools
-	python -m pip install --upgrade wheel
-	python -m pip install --upgrade -r "requirements.txt"
-	python -m pip install --upgrade -r "./pylib/requirements.txt"
-
 build:
 	sudo rm -f ./data/app-std* ./data/cron-std* ./data/supervisor.sock
-	docker-compose build
+	docker-compose build --progress plain
 
 run:
 	docker-compose up
@@ -44,4 +37,4 @@ connect:
 clean:
 	rm docker-compose.yml
 
-.PHONY: all help setup run connect clean pydeps
+.PHONY: all help setup run connect clean

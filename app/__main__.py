@@ -1,47 +1,38 @@
 #!/usr/bin/env python
 import logging.handlers
-
-import builtins
 import os
 import threading
 import zmq
-
-from pathlib import Path
 from zmq.error import ContextTerminated
 
 # setup builtins used by pylib init
-app_name = Path(__file__).stem
-builtins.APP_NAME = app_name
+import builtins
 builtins.SENTRY_EXTRAS = []
-
-
+from . import APP_NAME
 class CredsConfig:
-    sentry_dsn: f'opitem:"Sentry" opfield:{app_name}.dsn' = None  # type: ignore
+    sentry_dsn: f'opitem:"Sentry" opfield:{APP_NAME}.dsn' = None  # type: ignore
     cronitor_token: f'opitem:"cronitor" opfield:.password' = None  # type: ignore
-
-
 builtins.creds_config = CredsConfig()
 
-
-from lib import app_config, \
+from pylib import app_config, \
     creds, \
     device_name, \
     device_name_base, \
     log, \
-    log_handler
+    log_handler, \
+    threads
 
-from lib.datetime import is_list, \
+from pylib.datetime import is_list, \
     make_timestamp, \
     make_unix_timestamp, \
     parse_datetime, \
     ISO_DATE_FORMAT
-from lib.process import SignalHandler
-from lib.rabbit import MQConnection, ZMQListener
-from lib import threads
-from lib.threads import thread_nanny, die, bye
-from lib.app import AppThread, ZmqRelay
-from lib.zmq import zmq_term, Closable
-from lib.handler import exception_handler
+from pylib.process import SignalHandler
+from pylib.rabbit import MQConnection, ZMQListener
+from pylib.threads import thread_nanny, die, bye
+from pylib.app import AppThread, ZmqRelay
+from pylib.zmq import zmq_term, Closable
+from pylib.handler import exception_handler
 
 
 URL_WORKER_APP = 'inproc://app-worker'
@@ -84,7 +75,7 @@ class EventProcessor(AppThread, Closable):
                 log.debug(event)
 
 
-if __name__ == "__main__":
+def main():
     log.setLevel(logging.INFO)
     # ensure proper signal handling; must be main thread
     signal_handler = SignalHandler()
@@ -117,3 +108,7 @@ if __name__ == "__main__":
     finally:
         zmq_term()
     bye()
+
+
+if __name__ == "__main__":
+    main()

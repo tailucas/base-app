@@ -25,36 +25,30 @@ RUN chown -R app:app /home/app/
 # app setup
 WORKDIR /opt/app
 # configuration
+COPY app ./app
 COPY config ./config
-COPY base_setup.sh .
+COPY base_setup.sh app_setup.sh ./
 RUN /opt/app/base_setup.sh
-COPY app_setup.sh .
 RUN /opt/app/app_setup.sh
 # user scripts
-COPY app_entrypoint.sh .
-COPY app_setup.sh .
-COPY base_entrypoint.sh .
-COPY base_job.sh .
-COPY base_setup.sh .
-COPY connect_to_app.sh .
-COPY entrypoint.sh .
-COPY healthchecks_heartbeat.sh .
-# application setup
-COPY requirements.txt .
-COPY pylib/requirements.txt ./pylib/requirements.txt
+COPY app_entrypoint.sh \
+    base_entrypoint.sh \
+    entrypoint.sh \
+    base_job.sh \
+    healthchecks_heartbeat.sh \
+    connect_to_app.sh \
+    README.md \
+    ./
 # tools
-COPY pylib/cred_tool ./pylib/
-COPY pylib/config_interpol ./pylib/
-COPY pylib/yaml_interpol ./pylib/
-# python lib
-COPY --chown=app:app pylib/pylib ./lib
+COPY pylib/ ./pylib/
 # switch to user
 USER app
-ENV PYTHON_ADD_WHEEL 1
-ENV PATH="${PATH}:/home/app/.local/bin"
-COPY python_setup.sh .
+ENV PATH "${PATH}:/home/app/.local/bin"
+ENV PIP_DEFAULT_TIMEOUT 60
+ENV PIP_DISABLE_PIP_VERSION_CHECK 1
+ENV PIP_NO_CACHE_DIR 1
+COPY poetry.lock pyproject.toml python_setup.sh ./
 RUN /opt/app/python_setup.sh
-COPY base_app .
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
 CMD ["/opt/app/entrypoint.sh"]
