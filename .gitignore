@@ -3,6 +3,7 @@ docker-compose.yml
 .idea/
 .vscode/
 data/
+dist/
 venv/
 .venv/
 *.code-workspace
