@@ -48,7 +48,6 @@ ENV PIP_DEFAULT_TIMEOUT 60
 ENV PIP_DISABLE_PIP_VERSION_CHECK 1
 ENV PIP_NO_CACHE_DIR 1
 COPY poetry.lock pyproject.toml python_setup.sh ./
-ENV BASE_APP_BUILD 1
 RUN /opt/app/python_setup.sh
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
