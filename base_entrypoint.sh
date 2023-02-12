@@ -2,8 +2,8 @@
 set -eu
 set -o pipefail
 
-cat /opt/app/config/app.conf | /opt/app/pylib/config_interpol > "/opt/app/${APP_NAME}.conf"
-cat /opt/app/config/supervisord.conf | /opt/app/pylib/config_interpol > /opt/app/supervisord.conf
+/opt/app/pylib/config_interpol < /opt/app/config/app.conf > /opt/app/app.conf
+cp /opt/app/config/supervisord.conf /opt/app/supervisord.conf
 # cron
 cat << EOF >> /opt/app/supervisord.conf
 [program:cron]
@@ -12,5 +12,5 @@ autorestart=unexpected
 EOF
 if [ -n "${AWS_DEFAULT_REGION:-}" ]; then
   # AWS configuration (no tee for secrets)
-  cat /opt/app/config/aws-config | /opt/app/pylib/config_interpol > "/home/app/.aws/config"
+  /opt/app/pylib/config_interpol < /opt/app/config/aws-config > /home/app/.aws/config
 fi

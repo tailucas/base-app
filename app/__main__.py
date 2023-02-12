@@ -90,7 +90,7 @@ def main():
     # back to INFO logging
     log.setLevel(logging.INFO)
     try:
-        log.info(f'Working directory is [{os.getcwd()}]. Starting application threads...')
+        log.info(f'Working directory is [{os.getcwd()}]. Starting {APP_NAME} threads...')
         event_processor.start()
         data_reader.start()
         # start thread nanny
