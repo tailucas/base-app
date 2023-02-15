@@ -8,4 +8,4 @@ else
   poetry self update
 fi
 poetry install
-poetry show
+poetry show --tree
