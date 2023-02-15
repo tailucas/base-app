@@ -6,4 +6,5 @@ data/
 dist/
 venv/
 .venv/
+.devcontainer/
 *.code-workspace
