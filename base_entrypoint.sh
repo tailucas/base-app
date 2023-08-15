@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -eu
 set -o pipefail
 
@@ -7,7 +7,7 @@ cp /opt/app/config/supervisord.conf /opt/app/supervisord.conf
 # cron
 cat << EOF >> /opt/app/supervisord.conf
 [program:cron]
-command=/usr/sbin/crond -f -l 8
+command=/usr/sbin/cron -f
 autorestart=unexpected
 EOF
 if [ -n "${AWS_DEFAULT_REGION:-}" ]; then

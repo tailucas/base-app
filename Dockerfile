@@ -1,21 +1,25 @@
-FROM python:alpine
+FROM python:3.11-slim
 # system setup
-# https://github.com/inter169/systs/blob/master/alpine/crond/README.md
-RUN apk update \
-    && apk upgrade \
-    && apk --no-cache add \
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
         curl \
-        dcron \
+        cron \
         jq \
-        libcap \
+        lsof \
         supervisor
 # create no-password run-as user
-# https://wiki.alpinelinux.org/wiki/Setting_up_a_new_user
-RUN delgroup ping
-RUN addgroup --g 999 app
-RUN adduser -u 999 -G app -h /home/app -D app
-RUN addgroup app audio
-RUN addgroup app video
+RUN groupadd -f -r -g 999 app
+# create run-as user
+RUN useradd -r -u 999 -g 999 app
+# user permissions
+RUN adduser app audio
+RUN adduser app video
+# cron
+RUN chmod u+s /usr/sbin/cron
+# jobs
+#ADD config/cron/healthchecks_heartbeat /etc/cron.d/healthchecks_heartbeat
+#RUN crontab -u app /etc/cron.d/healthchecks_heartbeat
+#RUN chmod 0600 /etc/cron.d/healthchecks_heartbeat
 # used by pip, awscli, app
 RUN mkdir -p /home/app/.aws/ /opt/app/
 # file system permissions
@@ -44,9 +48,6 @@ COPY pylib/ ./pylib/
 # switch to user
 USER app
 ENV PATH "${PATH}:/home/app/.local/bin"
-ENV PIP_DEFAULT_TIMEOUT 60
-ENV PIP_DISABLE_PIP_VERSION_CHECK 1
-ENV PIP_NO_CACHE_DIR 1
 COPY poetry.lock pyproject.toml python_setup.sh ./
 RUN /opt/app/python_setup.sh
 # ssh, http, zmq, ngrok

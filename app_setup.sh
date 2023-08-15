@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -e
 set -o pipefail
 
@@ -11,4 +11,3 @@ for c in /opt/app/config/cron/*; do
 done
 # register user crons
 crontab -u app /opt/app/config/app_crontabs
-chown -R app:app /etc/crontabs/
