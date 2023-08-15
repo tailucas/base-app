@@ -18,10 +18,6 @@ RUN adduser app audio
 RUN adduser app video
 # cron
 RUN chmod u+s /usr/sbin/cron
-# jobs
-#ADD config/cron/healthchecks_heartbeat /etc/cron.d/healthchecks_heartbeat
-#RUN crontab -u app /etc/cron.d/healthchecks_heartbeat
-#RUN chmod 0600 /etc/cron.d/healthchecks_heartbeat
 # used by pip, awscli, app
 RUN mkdir -p /home/app/.aws/ /opt/app/
 # file system permissions
