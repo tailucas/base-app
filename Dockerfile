@@ -6,6 +6,8 @@ RUN apt-get update \
         cron \
         jq \
         lsof \
+        # provides uptime
+        procps \
         supervisor
 # create no-password run-as user
 RUN groupadd -f -r -g 999 app
