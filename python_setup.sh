@@ -7,5 +7,5 @@ if ! poetry --version; then
 else
   poetry self update
 fi
-poetry install
+poetry install --no-interaction
 poetry show --tree

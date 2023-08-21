@@ -5,6 +5,7 @@ RUN apt-get update \
         curl \
         cron \
         jq \
+        less \
         lsof \
         # provides uptime
         procps \
