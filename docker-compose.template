@@ -2,7 +2,10 @@ version: "3.8"
 services:
   app:
     image: "tailucas/base-app"
-    build: .
+    build:
+      context: .
+      args:
+        FOO: bar
     logging:
       driver: syslog
     tmpfs:

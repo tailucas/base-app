@@ -13,8 +13,10 @@ app = "app.__main__:main"
 python = "^3.10"
 pyzmq = "^25.0.0"
 sentry-sdk = "^1.15.0"
-pylib = {path = "pylib"}
 
+
+[tool.poetry.group.dev.dependencies]
+pylib = {path = "pylib"}
 
 [build-system]
 requires = ["poetry-core"]
