@@ -58,7 +58,9 @@ COPY app_entrypoint.sh \
     README.md \
     ./
 # tools
-COPY pylib/ ./pylib/
+COPY config_interpol ./
+COPY cred_tool ./
+COPY yaml_interpol ./
 # switch to user
 USER app
 ENV PATH "${PATH}:/home/app/.local/bin"

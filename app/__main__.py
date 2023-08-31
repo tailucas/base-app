@@ -15,7 +15,7 @@ class CredsConfig:
     cronitor_token: f'opitem:"cronitor" opfield:.password' = None  # type: ignore
 builtins.creds_config = CredsConfig()
 
-from pylib import (
+from tailucas_pylib import (
     app_config,
     creds,
     device_name,
@@ -24,23 +24,23 @@ from pylib import (
     log_handler,
 )
 
-from pylib.datetime import is_list, \
+from tailucas_pylib.datetime import is_list, \
     make_timestamp, \
     make_unix_timestamp, \
     parse_datetime, \
     ISO_DATE_FORMAT
-from pylib.process import SignalHandler
-from pylib.rabbit import MQConnection, ZMQListener
-from pylib.threads import (
+from tailucas_pylib.process import SignalHandler
+from tailucas_pylib.rabbit import MQConnection, ZMQListener
+from tailucas_pylib.threads import (
     thread_nanny,
     die,
     bye,
     interruptable_sleep,
     shutting_down
 )
-from pylib.app import AppThread, ZmqRelay
-from pylib.zmq import zmq_term, Closable
-from pylib.handler import exception_handler
+from tailucas_pylib.app import AppThread, ZmqRelay
+from tailucas_pylib.zmq import zmq_term, Closable
+from tailucas_pylib.handler import exception_handler
 
 
 URL_WORKER_APP = 'inproc://app-worker'
