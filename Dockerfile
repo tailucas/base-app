@@ -17,6 +17,7 @@ RUN sed -i -e "s/# ${LANG} ${ENCODING}/${LANG} ${ENCODING}/" /etc/locale.gen && 
     update-locale LANG=${LANG}
 # system setup
 RUN apt-get install -y --no-install-recommends \
+        build-essential \
         curl \
         cron \
         jq \

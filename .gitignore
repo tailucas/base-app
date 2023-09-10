@@ -6,5 +6,7 @@ data/
 dist/
 venv/
 .venv/
+.env
+__pycache__
 .devcontainer/
 *.code-workspace

@@ -10,7 +10,7 @@ cat << EOF >> /opt/app/supervisord.conf
 command=/usr/sbin/cron -f -L 4
 autorestart=unexpected
 EOF
-printenv >> /opt/app/cron.env
+printenv | sed 's/=\(.*\)/="\1"/' >> /opt/app/cron.env
 if [ -n "${AWS_DEFAULT_REGION:-}" ]; then
   # AWS configuration (no tee for secrets)
   /opt/app/config_interpol < /opt/app/config/aws-config > /home/app/.aws/config
