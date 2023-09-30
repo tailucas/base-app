@@ -22,6 +22,7 @@ from tailucas_pylib import (
     device_name_base,
     log,
     log_handler,
+    threads
 )
 
 from tailucas_pylib.datetime import is_list, \
@@ -34,9 +35,7 @@ from tailucas_pylib.rabbit import MQConnection, ZMQListener
 from tailucas_pylib.threads import (
     thread_nanny,
     die,
-    bye,
-    interruptable_sleep,
-    shutting_down
+    bye
 )
 from tailucas_pylib.app import AppThread, ZmqRelay
 from tailucas_pylib.zmq import zmq_term, Closable
@@ -58,11 +57,11 @@ class DataReader(AppThread):
 
     def run(self):
         with exception_handler(connect_url=URL_WORKER_RELAY, socket_type=zmq.PUSH, and_raise=True, shutdown_on_error=True) as socket:
-            while not shutting_down:
+            while not threads.shutting_down:
                 data = self.get_data()
                 log.info(f'{data=}')
                 socket.send_pyobj(data)
-                interruptable_sleep.wait(2)
+                threads.interruptable_sleep.wait(2)
 
 
 class DataRelay(ZmqRelay):
@@ -87,7 +86,7 @@ class EventProcessor(AppThread):
     # noinspection PyBroadException
     def run(self):
         with exception_handler(connect_url=URL_WORKER_APP, socket_type=zmq.PULL, and_raise=True, shutdown_on_error=True) as socket:
-            while not shutting_down:
+            while not threads.shutting_down:
                 event = socket.recv_pyobj()
                 log.info(f'{event=}')
 
@@ -121,7 +120,7 @@ def main():
         env_vars.sort()
         log.info(f'Startup complete with {len(env_vars)} environment variables visible: {env_vars}.')
         # hang around until something goes wrong
-        interruptable_sleep.wait()
+        threads.interruptable_sleep.wait()
         raise RuntimeWarning("Shutting down...")
     except(KeyboardInterrupt, RuntimeWarning, ContextTerminated) as e:
         log.warning(str(e))
