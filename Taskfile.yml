@@ -40,9 +40,19 @@ tasks:
       - rm -f docker-compose.template2
     generates:
       - docker-compose.yml
+  java:
+    desc: Build Java artifacts in preparation for container build.
+    preconditions:
+      - java -version
+      - javac -version
+      - mvn -v
+    cmds:
+      - mvn compile
+      - mvn test
+      - mvn package
   build:
-    deps: [setup]
-    desc: Clean up volume directory.
+    deps: [setup, java]
+    desc: Clean up volume directory and build container image.
     preconditions:
       - test -d ./data/
     cmds:

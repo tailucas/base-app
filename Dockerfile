@@ -1,5 +1,12 @@
 FROM python:3.11-slim
 ENV DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        gnupg \
+        java-common \
+        locales \
+        software-properties-common
 # generate correct locales
 ARG LANG
 ENV LANG=$LANG
@@ -9,23 +16,23 @@ ARG LC_ALL
 ENV LC_ALL=$LC_ALL
 ARG ENCODING
 ENV ENCODING=$ENCODING
-RUN apt-get update \
+RUN localedef -i ${LANGUAGE} -c -f ${ENCODING} -A /usr/share/locale/locale.alias ${LANG}
+RUN curl -sS https://apt.corretto.aws/corretto.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/corretto.gpg \
+    && add-apt-repository 'deb https://apt.corretto.aws stable main' \
+    # repeat so that it is detected; seems unrelated to async or layering issues
+    && add-apt-repository 'deb https://apt.corretto.aws stable main' \
+    && apt-get update \
     && apt-get install -y --no-install-recommends \
-        locales
-RUN sed -i -e "s/# ${LANG} ${ENCODING}/${LANG} ${ENCODING}/" /etc/locale.gen && \
-    dpkg-reconfigure --frontend=noninteractive locales && \
-    update-locale LANG=${LANG}
-# system setup
-RUN apt-get install -y --no-install-recommends \
         build-essential \
-        curl \
         cron \
+        java-21-amazon-corretto-jdk \
         jq \
         less \
         lsof \
         # provides uptime
         procps \
-        supervisor
+        supervisor \
+    && rm -rf /var/lib/apt/lists/*
 # create no-password run-as user
 RUN groupadd -f -r -g 999 app
 # create run-as user
@@ -62,6 +69,9 @@ COPY app_entrypoint.sh \
 COPY config_interpol ./
 COPY cred_tool ./
 COPY yaml_interpol ./
+# application
+COPY ./target/base-app-*.jar ./
+COPY ./target/log4j2.properties ./
 # switch to user
 USER app
 ENV PATH "${PATH}:/home/app/.local/bin"
