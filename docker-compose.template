@@ -1,18 +1,22 @@
 version: "3.8"
 services:
   app:
-    image: "tailucas/base-app"
+    image: "${DOCKER_IMAGE}"
     build:
       context: .
       args:
         FOO: bar
     logging:
       driver: syslog
+      options:
+        syslog-address: "${SYSLOG_ADDRESS}"
+        syslog-format: "rfc3164"
+        tag: "${DEVICE_NAME}"
     tmpfs:
     - /tmp
-    hostname: __DOCKER_HOSTNAME__
+    hostname: ${DEVICE_NAME}
     volumes:
       - ./data:/data
       - /dev/log:/dev/log
-    environment:
-      FLASK_ENV: development
+    env_file:
+      - .env

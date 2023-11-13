@@ -4,4 +4,3 @@ version: '3'
 
 vars:
   APP: base_app
-  DOCKER_APP: base-app

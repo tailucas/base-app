@@ -9,6 +9,8 @@ vars:
   USER_ID: 999
   GROUP_ID: 999
 
+dotenv: ['.env']
+
 tasks:
   default:
     cmds:
@@ -23,7 +25,18 @@ tasks:
       - sudo chown {{.USER_ID}}:{{.GROUP_ID}} ./data/
       - sudo chmod 755 ./data/
       - sudo chmod g+rws ./data/
+  create-dot-env:
+    desc: Dump container environment to local file.
+    preconditions:
+      - poetry -V
+      - python -V
+      - python3 -V
+      - test -f cred_tool
+      - test -n "$(docker ps | grep op-connect-api)"
+    cmds:
+      - poetry run python ./cred_tool ENV.{{.APP}} {{.APP}} | jq -r '. | to_entries[] | [.key,.value] | @tsv' | tr '\t' '=' | sed 's/=\(.*\)/="\1"/' > .env
   setup:
+    deps: [create-dot-env]
     desc: Generate a usable docker-compose.yml for Docker build.
     preconditions:
       - poetry -V
@@ -33,11 +46,9 @@ tasks:
       - test -f yaml_interpol
       - test -f docker-compose.template
     cmds:
-      - cat docker-compose.template | sed "s~__DOCKER_HOSTNAME__~{{.DOCKER_APP}}~g" > docker-compose.template2
-      - poetry run python ./cred_tool ENV.{{.APP}} {{.APP}} | poetry run python ./yaml_interpol services/app/environment docker-compose.template2 > docker-compose-build.yml
+      - cp docker-compose.template docker-compose-build.yml
       - poetry run python ./cred_tool ENV.{{.APP}} build | poetry run python ./yaml_interpol services/app/build/args docker-compose-build.yml > docker-compose.yml
       - rm -f docker-compose-build.yml
-      - rm -f docker-compose.template2
     generates:
       - docker-compose.yml
   java:
@@ -47,8 +58,6 @@ tasks:
       - javac -version
       - mvn -v
     cmds:
-      - mvn compile
-      - mvn test
       - mvn package
   build:
     deps: [setup, java]
@@ -76,12 +85,3 @@ tasks:
       - docker-compose up -d
   connect:
     cmd: ./connect_to_app.sh {{.DOCKER_APP}}
-  dump-app-env:
-    desc: Dump container environment to local file.
-    preconditions:
-      - poetry -V
-      - python -V
-      - python3 -V
-      - test -f cred_tool
-    cmds:
-      - poetry run python ./cred_tool ENV.{{.APP}} {{.APP}} | jq -r '. | to_entries[] | [.key,.value] | @tsv' | tr '\t' '=' | sed 's/=\(.*\)/="\1"/' > {{.APP}}.env

@@ -1,151 +1,94 @@
 package tailucas.app;
 
-import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URI;
-import java.net.URL;
-import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Set;
 
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.Appender;
-import org.apache.logging.log4j.core.Filter;
-import org.apache.logging.log4j.core.LoggerContext;
-import org.apache.logging.log4j.core.appender.FileAppender;
-import org.apache.logging.log4j.core.config.Configuration;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.zeromq.ZMQ;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import com.sanctionco.opconnect.OPConnectClient;
-import com.sanctionco.opconnect.OPConnectClientBuilder;
-import com.sanctionco.opconnect.model.Vault;
+import org.zeromq.ZMQ;
 
 import org.zeromq.ZContext;
 import org.zeromq.SocketType;
-import org.json.JSONArray;
-import org.json.JSONObject;
 
-/**
- * Hello world!
- *
- */
+import org.ini4j.Ini;
+
+
 public class App 
 {
+    private static Logger log = LoggerFactory.getLogger(App.class);
+
     private static void registerShutdownHook() {
         final Thread mainThread = Thread.currentThread();
-        Runtime.getRuntime().addShutdownHook(new Thread() {
+        Runtime.getRuntime().addShutdownHook(new Thread("shutdown hook") {
             public void run() {
                 try {
-                    System.out.println("Shutdown");
+                    log.info("triggered");
                     mainThread.join();
                 } catch (InterruptedException ex) {
-                    System.out.println(ex);
+                    log.error(ex.getMessage(), ex);
                 }
             }
         });
     }
 
-    public static String opRequest(String httpMethod) {
-        final String opServerAddr = System.getenv("OP_CONNECT_SERVER");
-        final String opToken = System.getenv("OP_CONNECT_TOKEN");
-        System.out.println("OP server is " + opServerAddr);
-        String response = null;
-        try {
-            HttpURLConnection.setFollowRedirects(false);
-            URL url = URI.create(opServerAddr+httpMethod).toURL();
-            HttpURLConnection con = (HttpURLConnection) url.openConnection();
-            con.setRequestMethod("GET");
-            con.setRequestProperty("Authorization", "Bearer " + opToken);
-            con.setRequestProperty("Content-type", "application/json");
-            con.setConnectTimeout(1000);
-            con.setReadTimeout(1000);
-            int status = con.getResponseCode();
-            System.out.println("1p response: " + status);
-            InputStreamReader sRx = null;
-            if (status > 299) {
-                sRx = new InputStreamReader(con.getErrorStream());
-            } else {
-                sRx = new InputStreamReader(con.getInputStream());
-            }
-            BufferedReader in = new BufferedReader(sRx);
-            String inputLine;
-            StringBuffer content = new StringBuffer();
-            while ((inputLine = in.readLine()) != null) {
-                content.append(inputLine);
-            }
-            response = content.toString();
-            System.out.println(response);
-            in.close();
-            con.disconnect();
-        } catch (MalformedURLException e) {
-            System.err.println(e);
-        } catch (IOException e) {
-            System.err.println(e);
-        }
-        return response;
-    }
-
-    private static final Logger logger = LogManager.getLogger(App.class);
     public static void main( String[] args )
     {
-        //registerShutdownHook();
+        final Locale locale = Locale.getDefault();
+        log.info("Locale language: {} ", locale.getLanguage());
+        log.info("Locale country: {}", locale.getCountry());
+        Thread.currentThread().setName("main");
+        registerShutdownHook();
+        final Map<String, String> envVars = System.getenv();
+        log.info("Starting application with env {}", envVars.keySet());
+
         /*
-        String opHealth = opRequest("/health");
-        JSONObject health = new JSONObject(opHealth);
-        System.out.println(health);
-        String opVaults = opRequest("/v1/vaults");
-        JSONArray vaults = new JSONArray(opVaults);
-        for (int i=0; i<vaults.length(); i++) {
-            JSONObject vault = vaults.getJSONObject(i);
-            System.out.println(vault.getString("id"));
-        }
+        OnePassword op = new OnePassword();
+        op.getItems();
         */
-
-        final String opServerAddr = System.getenv("OP_CONNECT_SERVER");
-        final String opToken = System.getenv("OP_CONNECT_TOKEN");
-
-        OPConnectClient client = OPConnectClientBuilder.builder()
-            .withEndpoint(opServerAddr)
-            .withAccessToken(opToken)
-            .build();
-        List<Vault> vaults = client.listVaults().join();
-        System.out.println(vaults);
-        client.close();
 
         final String javaVersion = Runtime.version().toString();
         ZContext context = new ZContext();
         ZMQ.Socket socket = context.createSocket(SocketType.PUSH);
-        System.out.println( "Hello (print) " + javaVersion );
-        logger.trace("Hello (trace) {} ", javaVersion);
-        logger.debug("Hello (debug) {} ", javaVersion);
-        logger.info("Hello (info) {} ", javaVersion);
-        logger.error("Hello? (error) {}", javaVersion);
-        logger.fatal("Hello?! (fatal) {}", javaVersion);
-        final Level defaultLevel = LogManager.getRootLogger().getLevel();
-        System.out.println("Current log level is: " + defaultLevel);
-        System.out.println("Changing log level for file appender...");
-        final LoggerContext ctx = (LoggerContext) LogManager.getContext(false);
-        final Configuration config = ctx.getConfiguration();
-        LoggerConfig rootLoggerConfig = config.getLoggers().get("");
-        System.out.println("Config is: " + rootLoggerConfig);
-        final FileAppender appender = (FileAppender) rootLoggerConfig.getAppenders().get("file");
-        System.out.println("Appender is: " + appender);
-        final Filter filter = appender.getFilter();
-        System.out.println("Filter is " + filter);
-        System.out.println("Adding appender with no filter...");
-        appender.removeFilter(filter);
-        logger.debug("Hello (DEBUG (should see)) {} ", javaVersion);
-        appender.addFilter(filter);
-        logger.debug("Hello (DEBUG (should NOT see)) {} ", javaVersion);
+        log.info( "Hello (print) " + javaVersion );
+        log.trace("Hello (trace) {} ", javaVersion);
+        log.debug("Hello (debug) {} ", javaVersion);
+        log.info("Hello (info) {} ", javaVersion);
+        log.error("Hello? (error) {}", javaVersion);
+        socket.close();
         context.close();
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
         for (Thread thread : threadSet) {
-            System.out.println("Thread: " + thread + " daemon? " + thread.isDaemon());
+            log.info(thread + " daemon? " + thread.isDaemon());
+        }
+        log.info("Working directory is: " + System.getProperty("user.dir"));
+        try {
+            Ini appConfig = new Ini(new File("./app.conf"));
+            log.info("App Device Name: " + appConfig.get("app", "device_name"));
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        }
+
+        /*
+        log.info("Starting MQTT client...");
+        Mqtt mqtt = new Mqtt();
+        mqtt.start();
+
+        log.info("Starting Rabbit MQ client...");
+        RabbitMq rabbit = new RabbitMq();
+        rabbit.start();
+
+        MyClass myc = new MyClass("foo");
+        myc.getAge();
+        */
+
+        try {
+            Thread.currentThread().sleep(2000);
+        } catch (InterruptedException e) {
+            log.error(e.getMessage(), e);
         }
     }
 }
