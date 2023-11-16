@@ -71,7 +71,6 @@ COPY cred_tool ./
 COPY yaml_interpol ./
 # application
 COPY ./target/base-app-*.jar ./
-COPY ./target/log4j2.properties ./
 # switch to user
 USER app
 ENV PATH "${PATH}:/home/app/.local/bin"
