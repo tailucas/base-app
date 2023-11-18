@@ -63,6 +63,7 @@ tasks:
     deps: [setup, java]
     desc: Clean up volume directory and build container image.
     preconditions:
+      - docker-compose -v
       - test -d ./data/
     cmds:
       - sudo rm -f ./data/app-std* ./data/cron-std* ./data/supervisor.sock
@@ -71,6 +72,7 @@ tasks:
     deps: [build]
     desc: Run docker container
     preconditions:
+      - docker -v
       - test -f docker-compose.yml
       - docker ps | grep 1password
     cmds:
@@ -79,6 +81,7 @@ tasks:
     deps: [build]
     desc: Run docker container and detach
     preconditions:
+      - docker -v
       - test -f docker-compose.yml
       - docker ps | grep 1password
     cmds:

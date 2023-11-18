@@ -61,6 +61,18 @@ Here is some detail about the intended use of this package.
 
 Beyond the Python dependencies defined in the [Poetry configuration](pyproject.toml), the package init carries hardcoded dependencies on [Sentry][sentry-url] and [1Password][1p-url] in order to function. Unless you want these and are effectively extending my [base project][baseapp-url], you're likely better off forking this package and cutting out what you do not need.
 
+### Required Tools
+Install these tools and make sure that they are on the environment `$PATH`.
+
+* `task` for project build orchestration: https://taskfile.dev/installation/#install-script
+
+* `docker` and `docker-compose` for container builds and execution: https://docs.docker.com/engine/install/
+* `mvn` Maven for Java build orchestration: https://maven.apache.org/download.cgi
+* `poetry` for Python dependency management: https://python-poetry.org/docs/#installation
+
+* `java` and `javac` for Java build and runtime: https://aws.amazon.com/corretto/
+* `python` is `python3` for Python runtime: https://www.python.org/downloads/
+
 ### Installation
 
 0. :stop_sign: This project uses [1Password Secrets Automation][1p-url] to store both application key-value pairs as well as runtime secrets. It is assumed that the connect server containers are already running on your environment. If you do not want to use this, then you'll need to fork this package and make the changes as appropriate. It's actually very easy to set up, but note that 1Password is a paid product with a free-tier for secrets automation. Here is an example of how this looks for my application and the generation of the docker-compose.yml relies on this step. Your secrets automation vault must contain an entry called `ENV.base_app` with these keys:
