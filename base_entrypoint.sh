@@ -15,6 +15,21 @@ if [ -n "${AWS_DEFAULT_REGION:-}" ]; then
   # AWS configuration (no tee for secrets)
   /opt/app/config_interpol < /opt/app/config/aws-config > /home/app/.aws/config
 fi
+
+# override Python application
+if [ -z "${NO_PYTHON_APP:-}" ]; then
+  cat << EOF >> /opt/app/supervisord.conf
+[program:app]
+priority=1
+command=poetry run app
+directory=/opt/app/
+user=app
+autorestart=unexpected
+stdout_syslog=true
+stderr_syslog=true
+EOF
+fi
+
 # add optional Java application
 if [ -n "${RUN_JAVA_APP:-}" ]; then
   cat << EOF >> /opt/app/supervisord.conf
