@@ -1,5 +1,6 @@
 client_secrets.json
 docker-compose.yml
+docker-compose-build.yml
 .idea/
 .vscode/
 data/
