@@ -17,7 +17,7 @@ if [ -n "${AWS_DEFAULT_REGION:-}" ]; then
 fi
 
 # override Python application
-if [ -z "${NO_PYTHON_APP:-}" ]; then
+if [ "${NO_PYTHON_APP:-}" != "true" ]; then
   cat << EOF >> /opt/app/supervisord.conf
 [program:app]
 priority=1
@@ -31,7 +31,7 @@ EOF
 fi
 
 # add optional Java application
-if [ -n "${RUN_JAVA_APP:-}" ]; then
+if [ "${RUN_JAVA_APP:-}" == "true" ]; then
   cat << EOF >> /opt/app/supervisord.conf
 [program:japp]
 priority=2
