@@ -24,17 +24,17 @@ trio = ["trio (>=0.23)"]
 
 [[package]]
 name = "boto3"
-version = "1.34.10"
+version = "1.34.39"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "boto3-1.34.10-py3-none-any.whl", hash = "sha256:8d3d3cc8bffc3fd6c64c55f69327d4e375b6796054dcf09f43ec8b0a9f864a74"},
-    {file = "boto3-1.34.10.tar.gz", hash = "sha256:ea14bc081d9cb40291133f89b3ad9070be360e152d6a98263af7b97a6534b669"},
+    {file = "boto3-1.34.39-py3-none-any.whl", hash = "sha256:476896e70d36c9134d4125834280c597c17b54bff4902baf2e5fcde74f8acec8"},
+    {file = "boto3-1.34.39.tar.gz", hash = "sha256:35bcbecf1b5d3620c93f0062d2994177f8bda25a9d2cba144d6462793c16065b"},
 ]
 
 [package.dependencies]
-botocore = ">=1.34.10,<1.35.0"
+botocore = ">=1.34.39,<1.35.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -43,13 +43,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.34.10"
+version = "1.34.39"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">= 3.8"
 files = [
-    {file = "botocore-1.34.10-py3-none-any.whl", hash = "sha256:ad0e924bbdd5469b62ea82a205bd3a9e03a00a61b661ed6446739b82849ea8be"},
-    {file = "botocore-1.34.10.tar.gz", hash = "sha256:e981d2d727f26732753269d60a51a1851ad9de6c1aa823e5443c7b06221aada0"},
+    {file = "botocore-1.34.39-py3-none-any.whl", hash = "sha256:e175360445424b83b0e28ae20d301b99cf44ff2c9d5ab1d8670899bec05a9753"},
+    {file = "botocore-1.34.39.tar.gz", hash = "sha256:9f00bd5e4698bcdd37ce6e224a896baf58d209678ed92834944b767de9061cc5"},
 ]
 
 [package.dependencies]
@@ -79,13 +79,13 @@ six = ">=1.2.0"
 
 [[package]]
 name = "certifi"
-version = "2023.11.17"
+version = "2024.2.2"
 description = "Python package for providing Mozilla's CA Bundle."
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "certifi-2023.11.17-py3-none-any.whl", hash = "sha256:e036ab49d5b79556f99cfc2d9320b34cfbe5be05c5871b51de9329f0603b0474"},
-    {file = "certifi-2023.11.17.tar.gz", hash = "sha256:9b469f3a900bf28dc19b8cfbf8019bf47f7fdd1a65a1d4ffb98fc14166beb4d1"},
+    {file = "certifi-2024.2.2-py3-none-any.whl", hash = "sha256:dc383c07b76109f368f6106eee2b593b04a011ea4d55f652c6ca24a754d1cdd1"},
+    {file = "certifi-2024.2.2.tar.gz", hash = "sha256:0569859f95fc761b18b45ef421b1290a0f65f147e92a1e5eb3e635f9a5e4e66f"},
 ]
 
 [[package]]
@@ -269,17 +269,18 @@ urllib3 = "*"
 
 [[package]]
 name = "dill"
-version = "0.3.7"
+version = "0.3.8"
 description = "serialize all of Python"
 optional = false
-python-versions = ">=3.7"
+python-versions = ">=3.8"
 files = [
-    {file = "dill-0.3.7-py3-none-any.whl", hash = "sha256:76b122c08ef4ce2eedcd4d1abd8e641114bfc6c2867f49f3c41facf65bf19f5e"},
-    {file = "dill-0.3.7.tar.gz", hash = "sha256:cc1c8b182eb3013e24bd475ff2e9295af86c1a38eb1aff128dac8962a9ce3c03"},
+    {file = "dill-0.3.8-py3-none-any.whl", hash = "sha256:c36ca9ffb54365bdd2f8eb3eff7d2a21237f8452b57ace88b1ac615b7e815bd7"},
+    {file = "dill-0.3.8.tar.gz", hash = "sha256:3ebe3c479ad625c4553aca177444d89b486b1d84982eeacded644afc0cf797ca"},
 ]
 
 [package.extras]
 graph = ["objgraph (>=1.7.2)"]
+profile = ["gprof2dot (>=2022.7.29)"]
 
 [[package]]
 name = "exceptiongroup"
@@ -492,13 +493,13 @@ files = [
 
 [[package]]
 name = "onepasswordconnectsdk"
-version = "1.4.0"
+version = "1.4.1"
 description = "Python SDK for 1Password Connect"
 optional = false
 python-versions = ">=3.7,<4.0"
 files = [
-    {file = "onepasswordconnectsdk-1.4.0-py3-none-any.whl", hash = "sha256:c01b4e5d6faf2e985654d19f34e84efacffcc3ba487bcbcec386d7f8d3e8d88e"},
-    {file = "onepasswordconnectsdk-1.4.0.tar.gz", hash = "sha256:a8dd3aa1750ef0d5b095368287e043bc30cc90281169d6aaaebca57d6b4e6c5c"},
+    {file = "onepasswordconnectsdk-1.4.1-py3-none-any.whl", hash = "sha256:8402b893e007d1a339bb5658b7600b32505c88234d74bfdb307e74c14e586e42"},
+    {file = "onepasswordconnectsdk-1.4.1.tar.gz", hash = "sha256:133defedbc4a4658f68e32865330c2d6844b132763037b984cb74aa21dd1e7f5"},
 ]
 
 [package.dependencies]
@@ -782,13 +783,13 @@ crt = ["botocore[crt] (>=1.33.2,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "1.39.1"
+version = "1.40.3"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = "*"
 files = [
-    {file = "sentry-sdk-1.39.1.tar.gz", hash = "sha256:320a55cdf9da9097a0bead239c35b7e61f53660ef9878861824fd6d9b2eaf3b5"},
-    {file = "sentry_sdk-1.39.1-py2.py3-none-any.whl", hash = "sha256:81b5b9ffdd1a374e9eb0c053b5d2012155db9cbe76393a8585677b753bd5fdc1"},
+    {file = "sentry-sdk-1.40.3.tar.gz", hash = "sha256:3c2b027979bb400cd65a47970e64f8cef8acda86b288a27f42a98692505086cd"},
+    {file = "sentry_sdk-1.40.3-py2.py3-none-any.whl", hash = "sha256:73383f28311ae55602bb6cc3b013830811135ba5521e41333a6e68f269413502"},
 ]
 
 [package.dependencies]
@@ -956,13 +957,13 @@ files = [
 
 [[package]]
 name = "tailucas-pylib"
-version = "0.2.0"
+version = "0.2.3"
 description = "Common Python utility modules"
 optional = false
 python-versions = ">=3.10,<4.0"
 files = [
-    {file = "tailucas_pylib-0.2.0-py3-none-any.whl", hash = "sha256:e937a4ca1a960e814359bebf7afe1d50f65514feccf98ab13f0af09c39fcad47"},
-    {file = "tailucas_pylib-0.2.0.tar.gz", hash = "sha256:5590e1301794af8fc8d3ce2ade176795a7e0ac95eb3296ef03c624594bd9b92b"},
+    {file = "tailucas_pylib-0.2.3-py3-none-any.whl", hash = "sha256:68ce3a77ba9bfb4f59eba0c64dd49a41cd9a6220c98ce47500c082ac9a3d85d7"},
+    {file = "tailucas_pylib-0.2.3.tar.gz", hash = "sha256:cbf6425f5e68dba37aff43bd083a26b4603fec83eec2dc0b49f3b26f6872cc19"},
 ]
 
 [package.dependencies]
