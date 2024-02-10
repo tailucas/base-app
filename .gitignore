@@ -10,7 +10,6 @@ venv/
 .env
 *.env
 __pycache__
-.devcontainer/
 *.code-workspace
 # Compiled class file
 *.class
