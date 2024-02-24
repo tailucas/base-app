@@ -1,0 +1,29 @@
+name: 'build' 
+on: # rebuild any PRs and main branch changes
+  pull_request:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout (GitHub)
+        uses: actions/checkout@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v2 
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Pre-build image and run make ci-build in dev container
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/tailucas/base-app
+          cacheFrom: ghcr.io/tailucas/base-app
+          push: always
+          runCmd: make ci-build
