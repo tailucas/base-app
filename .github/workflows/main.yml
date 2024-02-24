@@ -1,6 +1,6 @@
 name: 'build' 
-on: # rebuild any PRs and main branch changes
-  pull_request:
+on:
+  workflow_dispatch:
   push:
     branches:
       - main
