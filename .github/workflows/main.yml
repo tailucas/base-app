@@ -32,4 +32,13 @@ jobs:
           imageName: ghcr.io/tailucas/base-app
           cacheFrom: ghcr.io/tailucas/base-app
           push: always
-          runCmd: task
+          runCmd: |
+            task
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: tailucas/base-app:latest
