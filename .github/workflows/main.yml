@@ -33,4 +33,9 @@ jobs:
           cacheFrom: ghcr.io/tailucas/base-app
           push: always
           runCmd: |
-            task
+            task build
+
+      - name: Push project container
+        run: |
+          docker-compose images
+          docker-compose push
