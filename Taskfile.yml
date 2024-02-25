@@ -14,7 +14,7 @@ dotenv: ['.env']
 tasks:
   default:
     cmds:
-      - task: push
+      - task: build
   datadir:
     desc: Create system user and associate with docker group.
     cmds:

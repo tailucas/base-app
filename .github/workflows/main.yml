@@ -32,10 +32,7 @@ jobs:
           imageName: ghcr.io/tailucas/base-app
           cacheFrom: ghcr.io/tailucas/base-app
           push: always
-          runCmd: |
-            task build
+          runCmd: task
 
       - name: Push project container
-        run: |
-          docker-compose images
-          docker-compose push
+        run: docker-compose push
