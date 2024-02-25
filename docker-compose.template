@@ -1,11 +1,16 @@
 version: "3.8"
 services:
   app:
+    env_file:
+      - .env
     image: "${DOCKER_IMAGE}"
     build:
       context: .
       args:
-        FOO: bar
+        ENCODING: "${ENCODING}"
+        LANG: "${D_LANG}"
+        LANGUAGE: "${D_LANGUAGE}"
+        LC_ALL: "${D_LC_ALL}"
     logging:
       driver: syslog
       options:
@@ -18,5 +23,3 @@ services:
     volumes:
       - ./data:/data
       - /dev/log:/dev/log
-    env_file:
-      - .env

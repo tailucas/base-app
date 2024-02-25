@@ -3,4 +3,8 @@
 version: '3'
 
 vars:
-  APP: base_app
+  PROJECT_NAME: base-app
+  ENCODING: UTF-8
+  LANG: en_ZA.UTF-8
+  LANGUAGE: en_ZA
+  LC_ALL: en_ZA.UTF-8

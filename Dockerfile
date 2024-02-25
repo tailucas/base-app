@@ -15,8 +15,7 @@ ENV LANGUAGE=$LANGUAGE
 ARG LC_ALL
 ENV LC_ALL=$LC_ALL
 ARG ENCODING
-ENV ENCODING=$ENCODING
-RUN localedef -i ${LANGUAGE} -c -f ${ENCODING} -A /usr/share/locale/locale.alias ${LANG}
+RUN localedef -i ${LANGUAGE} -c -f $ENCODING -A /usr/share/locale/locale.alias ${LANG}
 RUN curl -sS https://apt.corretto.aws/corretto.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/corretto.gpg \
     && add-apt-repository 'deb https://apt.corretto.aws stable main' \
     # repeat so that it is detected; seems unrelated to async or layering issues

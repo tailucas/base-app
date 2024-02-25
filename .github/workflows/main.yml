@@ -32,5 +32,4 @@ jobs:
           imageName: ghcr.io/tailucas/base-app
           cacheFrom: ghcr.io/tailucas/base-app
           push: always
-          runCmd: |
-            task build
+          runCmd: task
