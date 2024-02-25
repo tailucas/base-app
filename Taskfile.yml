@@ -31,7 +31,7 @@ tasks:
       - echo 'D_LANG="{{.LANG}}"' >> .env
       - echo 'D_LANGUAGE="{{.LANGUAGE}}"' >> .env
       - echo 'D_LC_ALL="{{.LC_ALL}}"' >> .env
-      - echo 'DOCKER_IMAGE="{{.PROJECT_NAME}}"' >> .env
+      - echo 'DOCKER_IMAGE="{{.REGISTRY_NAME}}/{{.PROJECT_NAME}}"' >> .env
       - echo 'DEVICE_NAME="{{.PROJECT_NAME}}"' >> .env
       - echo 'APP_NAME="{{.PROJECT_NAME}}"' >> .env
       - echo 'SYSLOG_ADDRESS="udp://localhost:514"' >> .env
