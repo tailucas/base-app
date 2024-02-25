@@ -34,11 +34,5 @@ jobs:
           push: always
           runCmd: |
             task
-
-      - name: Build and push
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          platforms: linux/amd64
-          push: true
-          tags: tailucas/base-app:latest
+            docker tag base-app tailucas/base-app:latest
+            docker push tailucas/base-app:latest
