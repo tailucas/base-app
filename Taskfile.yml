@@ -14,7 +14,7 @@ dotenv: ['.env']
 tasks:
   default:
     cmds:
-      - task: build
+      - task: push
   datadir:
     desc: Create system user and associate with docker group.
     cmds:
@@ -58,6 +58,13 @@ tasks:
       - mvn -v
     cmds:
       - mvn package
+  push:
+    deps: [build]
+    desc: Push built image to Docker Hub
+    preconditions:
+      - docker-compose images
+    cmds:
+      - docker-compose push
   build:
     deps: [docker, java]
     desc: Clean up volume directory and build container image.
