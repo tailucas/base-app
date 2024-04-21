@@ -6,9 +6,7 @@ RUN apt-get update \
         gnupg \
         java-common \
         locales \
-        software-properties-common \
-        unzip \
-        zip
+        software-properties-common
 # generate correct locales
 ARG LANG
 ENV LANG=$LANG
@@ -18,11 +16,15 @@ ARG LC_ALL
 ENV LC_ALL=$LC_ALL
 ARG ENCODING
 RUN localedef -i ${LANGUAGE} -c -f $ENCODING -A /usr/share/locale/locale.alias ${LANG}
-RUN curl -s "https://get.sdkman.io" | bash
-RUN /bin/bash -c "source /root/.sdkman/bin/sdkman-init.sh && sdk install java 22-amzn"
-RUN apt-get install -y --no-install-recommends \
+RUN curl -sS https://apt.corretto.aws/corretto.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/corretto.gpg \
+    && add-apt-repository 'deb https://apt.corretto.aws stable main' \
+    # repeat so that it is detected; seems unrelated to async or layering issues
+    && add-apt-repository 'deb https://apt.corretto.aws stable main' \
+    && apt-get update \
+    && apt-get install -y --no-install-recommends \
         build-essential \
         cron \
+        java-21-amazon-corretto-jdk \
         jq \
         less \
         lsof \
