@@ -11,9 +11,9 @@ app = "app.__main__:main"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-pyzmq = "^25.1.2"
-sentry-sdk = "^1.40.5"
-tailucas-pylib = "^0.2.4"
+pyzmq = "^26.0.2"
+sentry-sdk = "^1.45.0"
+tailucas-pylib = "^0.2.6"
 
 [build-system]
 requires = ["poetry-core"]
