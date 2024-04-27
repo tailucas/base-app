@@ -27,6 +27,7 @@ user=app
 autorestart=unexpected
 stdout_syslog=true
 stderr_syslog=true
+stopwaitsecs=30
 EOF
 fi
 
@@ -41,5 +42,6 @@ user=app
 autorestart=unexpected
 stdout_syslog=true
 stderr_syslog=true
+stopwaitsecs=30
 EOF
 fi
