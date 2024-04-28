@@ -13,7 +13,8 @@ app = "app.__main__:main"
 python = "^3.11"
 pyzmq = "^26.0.2"
 sentry-sdk = "^2.0.1"
-tailucas-pylib = "^0.2.8"
+tailucas-pylib = "0.3.0"
+onepasswordconnectsdk = "^1.5.1"
 
 [build-system]
 requires = ["poetry-core"]
