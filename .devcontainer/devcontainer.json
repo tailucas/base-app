@@ -14,6 +14,11 @@
         },
         "ghcr.io/devcontainers/features/python:1": {}
     },
+    "containerEnv": {
+        "OP_CONNECT_SERVER": "${localEnv:OP_CONNECT_SERVER}",
+        "OP_CONNECT_TOKEN": "${localEnv:OP_CONNECT_TOKEN}",
+        "HC_PING_URL": "${localEnv:HC_PING_URL}"
+    },
     "workspaceFolder": "${localWorkspaceFolder}",
     "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind"
 }
