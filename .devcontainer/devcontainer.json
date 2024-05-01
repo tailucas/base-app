@@ -15,8 +15,9 @@
         "ghcr.io/devcontainers/features/python:1": {}
     },
     "containerEnv": {
-        "OP_CONNECT_SERVER": "${localEnv:OP_CONNECT_SERVER}",
+        "OP_CONNECT_HOST": "${localEnv:OP_CONNECT_HOST}",
         "OP_CONNECT_TOKEN": "${localEnv:OP_CONNECT_TOKEN}",
+        "OP_VAULT": "${localEnv:OP_VAULT}",
         "HC_PING_URL": "${localEnv:HC_PING_URL}"
     },
     "workspaceFolder": "${localWorkspaceFolder}",

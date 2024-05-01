@@ -37,6 +37,9 @@ tasks:
       - echo 'SYSLOG_ADDRESS="udp://localhost:514"' >> .env
       - echo 'RUN_JAVA_APP="true"' >> .env
       - echo 'HC_PING_URL={{.HC_PING_URL}}' >> .env
+      - echo 'OP_CONNECT_HOST={{.OP_CONNECT_HOST}}' >> .env
+      - echo 'OP_CONNECT_TOKEN={{.OP_CONNECT_TOKEN}}' >> .env
+      - echo 'OP_VAULT={{.OP_VAULT}}' >> .env
   docker:
     deps: [create-dot-env]
     desc: Generate a usable docker-compose.yml for Docker build.
