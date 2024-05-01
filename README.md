@@ -79,7 +79,7 @@ Install these tools and make sure that they are on the environment `$PATH`.
 
 * `DEVICE_NAME`: For naming the container. This project uses `base-app`.
 * `APP_NAME`: Used for referencing the application's actual name for the logger. This project uses `base_app`.
-* `OP_CONNECT_SERVER`, `OP_CONNECT_TOKEN`, `OP_CONNECT_VAULT`: Used to specify the URL of the 1Password connect server with associated client token and Vault ID. See [1Password](https://developer.1password.com/docs/connect/get-started#step-1-set-up-a-secrets-automation-workflow) for more.
+* `OP_CONNECT_HOST`, `OP_CONNECT_TOKEN`, `OP_CONNECT_VAULT`: Used to specify the URL of the 1Password connect server with associated client token and Vault ID. See [1Password](https://developer.1password.com/docs/connect/get-started#step-1-set-up-a-secrets-automation-workflow) for more.
 * `HC_PING_URL`: [Healthchecks][healthchecks-url] URL of this application's current health check status.
 
 With these configured, you are now able to build the application.
