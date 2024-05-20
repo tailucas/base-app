@@ -12,7 +12,9 @@
         "ghcr.io/devcontainers/features/java:1": {
             "installMaven": true
         },
-        "ghcr.io/devcontainers/features/python:1": {}
+        "ghcr.io/devcontainers/features/python:1": {
+	    "version": "3.11"
+	}
     },
     "containerEnv": {
         "OP_CONNECT_HOST": "${localEnv:OP_CONNECT_HOST}",
