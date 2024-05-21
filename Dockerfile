@@ -69,7 +69,7 @@ COPY config_interpol ./
 COPY cred_tool ./
 COPY yaml_interpol ./
 # application
-COPY ./target/app-*.jar ./app.jar
+COPY ./target/app-*-jar-with-dependencies.jar ./app.jar
 # switch to user
 USER app
 ENV PATH "${PATH}:/home/app/.local/bin"

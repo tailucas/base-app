@@ -4,10 +4,10 @@
   xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
   <modelVersion>4.0.0</modelVersion>
   <groupId>tailucas.app</groupId>
-  <artifactId>base-app</artifactId>
+  <artifactId>app</artifactId>
   <version>0.1.0</version>
   <packaging>jar</packaging>
-  <name>base-app</name>
+  <name>Base Application</name>
   <url>https://tailucas.github.io/</url>
   <description>Batteries-included boilerplate.</description>
   <properties>
@@ -32,6 +32,7 @@
     <maven.dependency.plugin.version>3.6.1</maven.dependency.plugin.version>
     <maven.exec.maven.plugin>3.2.0</maven.exec.maven.plugin>
     <maven.enforcer.plugin>3.4.1</maven.enforcer.plugin>
+    <maven.jar.plugin>3.1.0</maven.jar.plugin>
 
     <versions.maven.plugin.version>2.16.2</versions.maven.plugin.version>
     <spotbugs-maven-plugin.version>4.8.5.0</spotbugs-maven-plugin.version>
@@ -192,6 +193,28 @@
             </configuration>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <executions>
+          <execution>
+            <phase>package</phase>
+            <goals>
+              <goal>single</goal>
+            </goals>
+          </execution>
+        </executions>
+        <configuration>
+          <archive>
+            <manifest>
+              <addClasspath>true</addClasspath>
+              <mainClass>${project.mainclass}</mainClass>
+            </manifest>
+          </archive>
+          <descriptorRefs>
+            <descriptorRef>jar-with-dependencies</descriptorRef>
+          </descriptorRefs>
+        </configuration>
       </plugin>
     </plugins>
   </build>
