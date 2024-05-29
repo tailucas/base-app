@@ -36,6 +36,7 @@ tasks:
       - echo 'APP_NAME="{{.PROJECT_NAME}}"' >> .env
       - echo 'SYSLOG_ADDRESS="udp://localhost:514"' >> .env
       - echo 'RUN_JAVA_APP="true"' >> .env
+      - echo 'RUN_RUST_APP="true"' >> .env
       - echo 'HC_PING_URL={{.HC_PING_URL}}' >> .env
       - echo 'OP_CONNECT_HOST={{.OP_CONNECT_HOST}}' >> .env
       - echo 'OP_CONNECT_TOKEN={{.OP_CONNECT_TOKEN}}' >> .env
@@ -47,6 +48,8 @@ tasks:
       - poetry -V
       - python -V
       - python3 -V
+      - cargo -V
+      - rustup -V
       - test -f yaml_interpol
       - test -f docker-compose.template
     cmds:

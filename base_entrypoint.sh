@@ -31,11 +31,27 @@ stopwaitsecs=30
 EOF
 fi
 
+# add optional Rust application
+if [ "${RUN_RUST_APP:-}" == "true" ]; then
+  cat << EOF >> /opt/app/supervisord.conf
+[program:rapp]
+priority=2
+command=cargo run --release
+directory=/opt/app/
+user=app
+autorestart=unexpected
+stdout_syslog=true
+stderr_syslog=true
+stopwaitsecs=30
+startsecs=0
+EOF
+fi
+
 # add optional Java application
 if [ "${RUN_JAVA_APP:-}" == "true" ]; then
   cat << EOF >> /opt/app/supervisord.conf
 [program:japp]
-priority=2
+priority=3
 command=java -jar app.jar
 directory=/opt/app/
 user=app

@@ -70,10 +70,14 @@ COPY cred_tool ./
 COPY yaml_interpol ./
 # application
 COPY ./target/app-*-jar-with-dependencies.jar ./app.jar
-# switch to user
+COPY rust_setup.sh Cargo.toml Cargo.lock rapp rlib ./
+RUN chown app:app Cargo.lock
+COPY pyproject.toml poetry.lock python_setup.sh ./
+RUN chown app:app poetry.lock
+# switch to run user
 USER app
-ENV PATH "${PATH}:/home/app/.local/bin"
-COPY poetry.lock pyproject.toml python_setup.sh ./
+ENV PATH "${PATH}:/home/app/.local/bin:/home/app/.cargo/bin"
+RUN /opt/app/rust_setup.sh
 RUN /opt/app/python_setup.sh
 # ssh, http, zmq, ngrok
 EXPOSE 22 5000 5556 5558 4040 8080
