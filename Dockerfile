@@ -79,6 +79,6 @@ USER app
 ENV PATH "${PATH}:/home/app/.local/bin:/home/app/.cargo/bin"
 RUN /opt/app/rust_setup.sh
 RUN /opt/app/python_setup.sh
-# ssh, http, zmq, ngrok
-EXPOSE 22 5000 5556 5558 4040 8080
+# example HTTP backend
+# EXPOSE 8080
 CMD ["/opt/app/entrypoint.sh"]

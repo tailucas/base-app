@@ -28,19 +28,15 @@ tasks:
     cmds:
       - rm -f .env
       - echo 'ENCODING="{{.ENCODING}}"' >> .env
+      # avoid conflict with builder environment
       - echo 'D_LANG="{{.LANG}}"' >> .env
       - echo 'D_LANGUAGE="{{.LANGUAGE}}"' >> .env
       - echo 'D_LC_ALL="{{.LC_ALL}}"' >> .env
       - echo 'DOCKER_IMAGE="{{.REGISTRY_NAME}}/{{.PROJECT_NAME}}"' >> .env
       - echo 'DEVICE_NAME="{{.PROJECT_NAME}}"' >> .env
-      - echo 'APP_NAME="{{.PROJECT_NAME}}"' >> .env
       - echo 'SYSLOG_ADDRESS="udp://localhost:514"' >> .env
-      - echo 'RUN_JAVA_APP="true"' >> .env
-      - echo 'RUN_RUST_APP="true"' >> .env
-      - echo 'HC_PING_URL={{.HC_PING_URL}}' >> .env
-      - echo 'OP_CONNECT_HOST={{.OP_CONNECT_HOST}}' >> .env
-      - echo 'OP_CONNECT_TOKEN={{.OP_CONNECT_TOKEN}}' >> .env
-      - echo 'OP_VAULT={{.OP_VAULT}}' >> .env
+      - cmd: poetry run python ./cred_tool ENV.{{.PROJECT_NAME}} {{.PROJECT_NAME}} build | jq -r '. | to_entries[] | [.key,.value] | @tsv' | tr '\t' '=' | sed 's/=\(.*\)/="\1"/' >> .env
+        ignore_error: true
   docker:
     deps: [create-dot-env]
     desc: Generate a usable docker-compose.yml for Docker build.
