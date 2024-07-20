@@ -25,5 +25,6 @@
         "HC_PING_URL": "${localEnv:HC_PING_URL}"
     },
     "workspaceFolder": "${localWorkspaceFolder}",
-    "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind"
+    "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
+    "runArgs": ["--network=host"]
 }

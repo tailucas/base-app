@@ -33,17 +33,17 @@ trio = ["trio (>=0.23)"]
 
 [[package]]
 name = "boto3"
-version = "1.34.144"
+version = "1.34.145"
 description = "The AWS SDK for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "boto3-1.34.144-py3-none-any.whl", hash = "sha256:b8433d481d50b68a0162c0379c0dd4aabfc3d1ad901800beb5b87815997511c1"},
-    {file = "boto3-1.34.144.tar.gz", hash = "sha256:2f3e88b10b8fcc5f6100a9d74cd28230edc9d4fa226d99dd40a3ab38ac213673"},
+    {file = "boto3-1.34.145-py3-none-any.whl", hash = "sha256:69d5afb7a017d07dd6bdfb680d2912d5d369b3fafa0a45161207d9f393b14d7e"},
+    {file = "boto3-1.34.145.tar.gz", hash = "sha256:ac770fb53dde1743aec56bd8e56b7ee2e2f5ad42a37825968ec4ff8428822640"},
 ]
 
 [package.dependencies]
-botocore = ">=1.34.144,<1.35.0"
+botocore = ">=1.34.145,<1.35.0"
 jmespath = ">=0.7.1,<2.0.0"
 s3transfer = ">=0.10.0,<0.11.0"
 
@@ -52,13 +52,13 @@ crt = ["botocore[crt] (>=1.21.0,<2.0a0)"]
 
 [[package]]
 name = "botocore"
-version = "1.34.144"
+version = "1.34.145"
 description = "Low-level, data-driven core of boto 3."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "botocore-1.34.144-py3-none-any.whl", hash = "sha256:a2cf26e1bf10d5917a2285e50257bc44e94a1d16574f282f3274f7a5d8d1f08b"},
-    {file = "botocore-1.34.144.tar.gz", hash = "sha256:4215db28d25309d59c99507f1f77df9089e5bebbad35f6e19c7c44ec5383a3e8"},
+    {file = "botocore-1.34.145-py3-none-any.whl", hash = "sha256:2e72e262de02adcb0264ac2bac159a28f55dbba8d9e52aa0308773a42950dff5"},
+    {file = "botocore-1.34.145.tar.gz", hash = "sha256:edf0fb4c02186ae29b76263ac5fda18b0a085d334a310551c9984407cf1079e6"},
 ]
 
 [package.dependencies]
@@ -868,13 +868,13 @@ crt = ["botocore[crt] (>=1.33.2,<2.0a.0)"]
 
 [[package]]
 name = "sentry-sdk"
-version = "2.9.0"
+version = "2.10.0"
 description = "Python client for Sentry (https://sentry.io)"
 optional = false
 python-versions = ">=3.6"
 files = [
-    {file = "sentry_sdk-2.9.0-py2.py3-none-any.whl", hash = "sha256:0bea5fa8b564cc0d09f2e6f55893e8f70286048b0ffb3a341d5b695d1af0e6ee"},
-    {file = "sentry_sdk-2.9.0.tar.gz", hash = "sha256:4c85bad74df9767976afb3eeddc33e0e153300e887d637775a753a35ef99bee6"},
+    {file = "sentry_sdk-2.10.0-py2.py3-none-any.whl", hash = "sha256:87b3d413c87d8e7f816cc9334bff255a83d8b577db2b22042651c30c19c09190"},
+    {file = "sentry_sdk-2.10.0.tar.gz", hash = "sha256:545fcc6e36c335faa6d6cda84669b6e17025f31efbf3b2211ec14efe008b75d1"},
 ]
 
 [package.dependencies]
@@ -1047,13 +1047,13 @@ files = [
 
 [[package]]
 name = "tailucas-pylib"
-version = "0.4.2"
+version = "0.4.3"
 description = "Common Python utility modules"
 optional = false
 python-versions = "<4.0,>=3.11"
 files = [
-    {file = "tailucas_pylib-0.4.2-py3-none-any.whl", hash = "sha256:70b23f00374e9b44de9499dfc1dd4ddd00918ab8391b3a059ecf4f401a4d1f7c"},
-    {file = "tailucas_pylib-0.4.2.tar.gz", hash = "sha256:e9798968272920a7ad26de2234e9f19bdfd2deb2336af4f08f054bff5d65d828"},
+    {file = "tailucas_pylib-0.4.3-py3-none-any.whl", hash = "sha256:44d0176b58eb2aa0708a76e068ac5530904d12db604682144f2b4b5105e57caa"},
+    {file = "tailucas_pylib-0.4.3.tar.gz", hash = "sha256:97029f6f772a97c1f4389927d11dea045e6a0bba99b895f1c54ec5414bf41819"},
 ]
 
 [package.dependencies]
@@ -1101,4 +1101,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.11"
-content-hash = "e4b5092c90506578b843477684b5b2f5863364a9a771cf4e128da1dda444549a"
+content-hash = "7fb0eaf813f733fbd9377d8f25fefd3ca87b8e51541eaf1d4da2a61f5a154398"
