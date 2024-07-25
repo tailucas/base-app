@@ -2,6 +2,10 @@
 set -eu
 set -o pipefail
 
+if [ -n "${TEST_ON_START_ADDRESS:-}" ]; then
+  nc -zv "${TEST_ON_START_ADDRESS}" "${TEST_ON_START_PORT:-80}"
+fi
+
 . /opt/app/base_entrypoint.sh
 . /opt/app/app_entrypoint.sh
 
