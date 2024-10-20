@@ -2,7 +2,9 @@
 set -eu
 set -o pipefail
 
-/opt/app/config_interpol < /opt/app/config/app.conf > /opt/app/app.conf
+if [ -f /opt/app/config/app.conf ]; then
+  /opt/app/config_interpol < /opt/app/config/app.conf > /opt/app/app.conf
+fi
 cp /opt/app/config/supervisord.conf /opt/app/supervisord.conf
 
 if [ "${NO_CRON:-}" != "true" ]; then
