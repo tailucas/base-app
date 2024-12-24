@@ -52,7 +52,7 @@ class DataReader(AppThread):
         ) as socket:
             while not threads.shutting_down:
                 data = self.get_data()
-                log.info(f"{data=}")
+                log.info(f"Source {data=}")
                 socket.send_pyobj(data)
                 threads.interruptable_sleep.wait(2)
 
@@ -67,41 +67,40 @@ class DataRelay(ZmqRelay):
 
     def process_message(self, sink_socket):
         data = self.socket.recv_pyobj()
-        log.info(f"{data=}")
+        log.info(f"Relay {data=}")
         sink_socket.send_pyobj(data)
 
 
 class EventProcessor(AppThread):
-    def __init__(self):
+    def __init__(self, zmq_url):
         AppThread.__init__(self, name=self.__class__.__name__)
+        self._zmq_url = zmq_url
 
     # noinspection PyBroadException
     def run(self):
         with exception_handler(
-            connect_url=URL_WORKER_APP,
+            connect_url=self._zmq_url,
             socket_type=zmq.PULL,
             and_raise=True,
-            shutdown_on_error=True,
+            shutdown_on_error=True
         ) as socket:
+            log.info(f'Sink socket started for {self._zmq_url}.')
             while not threads.shutting_down:
-                event = socket.recv_pyobj()
-                log.info(f"{event=}")
+                data = socket.recv_pyobj()
+                log.info(f"Sink {data=}")
 
 
 def main():
-    log.setLevel(logging.DEBUG)
+    log.info(f"Log level is set to {logging.getLevelName(log.getEffectiveLevel())}")
     log.info(f"Locale is set to {locale.getlocale()}.")
     # ensure proper signal handling; must be main thread
     signal_handler = SignalHandler()
-    event_processor = EventProcessor()
+    event_processor = EventProcessor(zmq_url=URL_WORKER_APP)
     data_relay = DataRelay(source_zmq_url=URL_WORKER_RELAY, sink_zmq_url=URL_WORKER_APP)
     data_reader = DataReader()
     nanny = threading.Thread(
         name="nanny", target=thread_nanny, args=(signal_handler,), daemon=True
     )
-    # startup completed
-    # back to INFO logging
-    log.setLevel(logging.INFO)
     try:
         log.info(
             f"Working directory is [{os.getcwd()}]. Starting {APP_NAME} threads..."
@@ -116,13 +115,9 @@ def main():
         log.info(
             f"Startup complete with {len(env_vars)} environment variables visible: {env_vars}."
         )
-        # hang around until something goes wrong
         threads.interruptable_sleep.wait()
-        raise RuntimeWarning("Shutting down...")
-    except (KeyboardInterrupt, RuntimeWarning, ContextTerminated) as e:
-        log.warning(str(e))
-        die()
     finally:
+        die()
         zmq_term()
     bye()
 
