@@ -1,12 +1,12 @@
-FROM python:3.11-slim-bullseye
+FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
         curl \
         gnupg \
-        netcat \
         java-common \
         locales \
+        netcat-openbsd \
         software-properties-common
 # generate correct locales
 ARG LANG
@@ -16,7 +16,10 @@ ENV LANGUAGE ${LANGUAGE}
 ARG LC_ALL
 ENV LC_ALL ${LC_ALL}
 ARG ENCODING
-RUN localedef -i ${LANGUAGE} -c -f ${ENCODING} -A /usr/share/locale/locale.alias ${LANG}
+RUN locale-gen ${LANGUAGE} \
+    && locale-gen ${LANG} \
+    && update-locale \
+    && locale -a
 RUN curl -sS https://apt.corretto.aws/corretto.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/corretto.gpg \
     && add-apt-repository 'deb https://apt.corretto.aws stable main' \
     # repeat so that it is detected; seems unrelated to async or layering issues
@@ -66,15 +69,12 @@ COPY app_entrypoint.sh \
     README.md \
     ./
 # tools
-COPY config_interpol ./
-COPY cred_tool ./
-COPY yaml_interpol ./
 # application
 COPY ./target/app-*-jar-with-dependencies.jar ./app.jar
 COPY rust_setup.sh Cargo.toml Cargo.lock rapp rlib ./
 RUN chown app:app Cargo.lock
-COPY pyproject.toml poetry.lock python_setup.sh ./
-RUN chown app:app poetry.lock
+COPY pyproject.toml uv.lock python_setup.sh ./
+RUN chown app:app uv.lock
 # switch to run user
 USER app
 ENV PATH "${PATH}:/home/app/.local/bin:/home/app/.cargo/bin"

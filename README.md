@@ -18,7 +18,7 @@ Enough talk! What do I get?
 * Pre-configured process control using [supervisor](http://supervisord.org/).
 * Automatic syslog configuration to log to the Docker host rsyslog.
 * Support for AWS-CLI if appropriate AWS environment variables are present, like `AWS_DEFAULT_REGION`.
-* Python dependency management using [Poetry][poetry-url].
+* Python dependency management using [uv][uv-url].
 
 Here is a breakdown of some of the sample application features and structure:
 
@@ -33,7 +33,7 @@ Technologies that help make this package useful:
 
 [![1Password][1p-shield]][1p-url]
 [![Amazon AWS][aws-shield]][aws-url]
-[![Poetry][poetry-shield]][poetry-url]
+[![uv][uv-shield]][uv-url]
 [![Python][python-shield]][python-url]
 [![RabbitMQ][rabbit-shield]][rabbit-url]
 [![Sentry][sentry-shield]][sentry-url]
@@ -59,7 +59,7 @@ Here is some detail about the intended use of this package.
 
 ### Prerequisites
 
-Beyond the Python dependencies defined in the [Poetry configuration](pyproject.toml), the package init carries hardcoded dependencies on [Sentry][sentry-url] and [1Password][1p-url] in order to function. Unless you want these and are effectively extending my [base project][baseapp-url], you're likely better off forking this package and cutting out what you do not need.
+Beyond the Python dependencies defined in the [project configuration](pyproject.toml), the package init carries hardcoded dependencies on [Sentry][sentry-url] and [1Password][1p-url] in order to function. Unless you want these and are effectively extending my [base project][baseapp-url], you're likely better off forking this package and cutting out what you do not need.
 
 ### Required Tools
 Install these tools and make sure that they are on the environment `$PATH`.
@@ -68,7 +68,7 @@ Install these tools and make sure that they are on the environment `$PATH`.
 
 * `docker` and `docker-compose` for container builds and execution: https://docs.docker.com/engine/install/
 * `mvn` Maven for Java build orchestration: https://maven.apache.org/download.cgi
-* `poetry` for Python dependency management: https://python-poetry.org/docs/#installation
+* `uv` for Python dependency management: https://docs.astral.sh/uv/getting-started/installation/
 
 * `java` and `javac` for Java build and runtime: https://aws.amazon.com/corretto/
 * `python` is `python3` for Python runtime: https://www.python.org/downloads/
@@ -90,30 +90,21 @@ In addition to this, [additional runtime configuration](https://github.com/tailu
    ```sh
    git clone https://github.com/tailucas/base-app.git
    ```
-2. Verify that the git submodule is present.
+2. Start a [devcontainer](https://containers.dev/).
    ```sh
-   git submodule init
-   git submodule update
+   make
    ```
-4. Make the Docker runtime user and set directory permissions. :hand: Be sure to first review the Makefile contents for assumptions around user IDs for Docker.
+3. Now generate the project container:
    ```sh
-   make user
+   task build
    ```
-5. Now generate the docker-compose.yml:
+4. If successful and the local environment is running the 1Password connect containers, run the application. For foreground:
    ```sh
-   make setup
+   task run
    ```
-6. And generate the Docker image:
+   For background (this works together with the devcontainer `docker-outside-of-docker` option meaning that the host system is now running your project and how you can exit the dev container and remove it without affecting your running container):
    ```sh
-   make build
-   ```
-7. If successful and the local environment is running the 1Password connect containers, run the application. For foreground:
-   ```sh
-   make run
-   ```
-   For background:
-   ```sh
-   make rund
+   task rund
    ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
@@ -169,8 +160,8 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 [cronitor-url]: https://cronitor.io/
 [healthchecks-url]: https://healthchecks.io/
 [msgpack-url]: https://msgpack.org/
-[poetry-url]: https://python-poetry.org/
-[poetry-shield]: https://img.shields.io/static/v1?style=for-the-badge&message=Poetry&color=60A5FA&logo=Poetry&logoColor=FFFFFF&label=
+[uv-url]: https://docs.astral.sh/uv/
+[uv-shield]: https://img.shields.io/static/v1?style=for-the-badge&message=uv&color=60A5FA&logo=uv&logoColor=FFFFFF&label=
 [python-url]: https://www.python.org/
 [python-shield]: https://img.shields.io/static/v1?style=for-the-badge&message=Python&color=3776AB&logo=Python&logoColor=FFFFFF&label=
 [rabbit-url]: https://www.rabbitmq.com/

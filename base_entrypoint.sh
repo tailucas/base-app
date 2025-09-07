@@ -3,7 +3,7 @@ set -eu
 set -o pipefail
 
 if [ -f /opt/app/config/app.conf ]; then
-  /opt/app/config_interpol < /opt/app/config/app.conf > /opt/app/app.conf
+  uv run config_interpol < /opt/app/config/app.conf > /opt/app/app.conf
 fi
 cp /opt/app/config/supervisord.conf /opt/app/supervisord.conf
 
@@ -20,7 +20,7 @@ printenv | sed 's/=\(.*\)/="\1"/' >> /opt/app/cron.env
 # set AWS config
 if [ -n "${AWS_DEFAULT_REGION:-}" ]; then
   # AWS configuration (no tee for secrets)
-  /opt/app/config_interpol < /opt/app/config/aws-config > /home/app/.aws/config
+  uv run config_interpol < /opt/app/config/aws-config > /home/app/.aws/config
 fi
 
 # override Python application
@@ -28,7 +28,7 @@ if [ "${NO_PYTHON_APP:-}" != "true" ]; then
   cat << EOF >> /opt/app/supervisord.conf
 [program:app]
 priority=1
-command=poetry run app
+command=uv run app
 directory=/opt/app/
 user=app
 autorestart=unexpected

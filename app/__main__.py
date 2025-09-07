@@ -1,37 +1,22 @@
 #!/usr/bin/env python
+import asyncio
 import locale
-import logging.handlers
+import logging
 import os
 import threading
 import zmq
-from zmq.error import ContextTerminated
 
-# setup builtins used by pylib init
-import builtins
-
-builtins.SENTRY_EXTRAS = []
-from . import APP_NAME
-
-
-class CredsConfig:
-    sentry_dsn: f'opitem:"Sentry" opfield:{APP_NAME}.dsn' = None  # type: ignore
-    cronitor_token: 'opitem:"cronitor" opfield:.password' = None  # type: ignore
-
-
-builtins.creds_config = CredsConfig()
-
-from tailucas_pylib import log, threads
-
+from tailucas_pylib.config import log, APP_NAME, app_config, creds
 from tailucas_pylib.datetime import make_timestamp
 from tailucas_pylib.process import SignalHandler
-from tailucas_pylib.threads import thread_nanny, die, bye
+from tailucas_pylib.threads import thread_nanny, die, bye, shutting_down, interruptable_sleep, trigger_exception
 from tailucas_pylib.app import AppThread, ZmqRelay
-from tailucas_pylib.zmq import zmq_term
+from tailucas_pylib.zmq import zmq_term, URL_WORKER_APP, URL_WORKER_RELAY
 from tailucas_pylib.handler import exception_handler
 
-
-URL_WORKER_APP = "inproc://app-worker"
-URL_WORKER_RELAY = "inproc://app-relay"
+import sentry_sdk
+from sentry_sdk.integrations.asyncio import AsyncioIntegration
+from sentry_sdk.integrations.sys_exit import SysExitIntegration
 
 
 class DataReader(AppThread):
@@ -50,11 +35,11 @@ class DataReader(AppThread):
             and_raise=True,
             shutdown_on_error=True,
         ) as socket:
-            while not threads.shutting_down:
+            while not shutting_down:
                 data = self.get_data()
                 log.info(f"Source {data=}")
                 socket.send_pyobj(data)
-                threads.interruptable_sleep.wait(2)
+                interruptable_sleep.wait(2)
 
 
 class DataRelay(ZmqRelay):
@@ -85,14 +70,32 @@ class EventProcessor(AppThread):
             shutdown_on_error=True
         ) as socket:
             log.info(f'Sink socket started for {self._zmq_url}.')
-            while not threads.shutting_down:
+            while not shutting_down:
                 data = socket.recv_pyobj()
                 log.info(f"Sink {data=}")
 
 
-def main():
+async def main():
     log.info(f"Log level is set to {logging.getLevelName(log.getEffectiveLevel())}")
     log.info(f"Locale is set to {locale.getlocale()}.")
+    try:
+        # sentry instrumentation
+        sentry_dsn_creds_path = app_config.get("creds", "sentry_dsn").replace('__APP_NAME__', APP_NAME)
+        log.info(f'Loading Sentry.io DSN from creds path {sentry_dsn_creds_path}...')
+        sentry_dsn = creds.get_creds(sentry_dsn_creds_path)
+        sentry_sdk.init(
+            dsn=sentry_dsn,
+            integrations=[
+                AsyncioIntegration(),
+                SysExitIntegration(capture_successful_exits=True)
+            ],
+            send_default_pii=True
+        )
+    except AssertionError as e:
+        log.exception(f'Cannot set up Sentry instrumentation.')
+        trigger_exception = e
+        bye()
+    log.info(f'Installing signal handler and starting application threads...')
     # ensure proper signal handling; must be main thread
     signal_handler = SignalHandler()
     event_processor = EventProcessor(zmq_url=URL_WORKER_APP)
@@ -115,7 +118,10 @@ def main():
         log.info(
             f"Startup complete with {len(env_vars)} environment variables visible: {env_vars}."
         )
-        threads.interruptable_sleep.wait()
+        interruptable_sleep.wait()
+    except KeyboardInterrupt:
+        # important to handle explicitly to prevent main thread death
+        pass
     finally:
         die()
         zmq_term()
@@ -123,4 +129,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    asyncio.run(main())

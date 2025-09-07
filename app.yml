@@ -3,8 +3,8 @@
 version: '3'
 
 vars:
-  REGISTRY_NAME: tailucas
   PROJECT_NAME: base-app
+  WORK_DIR: /opt/app
   ENCODING: UTF-8
   LANG: en_ZA.UTF-8
   LANGUAGE: en_ZA
