@@ -6,7 +6,7 @@ import os
 import threading
 import zmq
 
-from tailucas_pylib.config import log, APP_NAME, app_config, creds
+from tailucas_pylib import log, APP_NAME, app_config, creds
 from tailucas_pylib.datetime import make_iso_timestamp
 from tailucas_pylib.process import SignalHandler
 from tailucas_pylib.threads import thread_nanny, die, bye, shutting_down, interruptable_sleep, trigger_exception
