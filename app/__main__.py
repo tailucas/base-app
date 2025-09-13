@@ -7,7 +7,7 @@ import threading
 import zmq
 
 from tailucas_pylib.config import log, APP_NAME, app_config, creds
-from tailucas_pylib.datetime import make_timestamp
+from tailucas_pylib.datetime import make_iso_timestamp
 from tailucas_pylib.process import SignalHandler
 from tailucas_pylib.threads import thread_nanny, die, bye, shutting_down, interruptable_sleep, trigger_exception
 from tailucas_pylib.app import AppThread, ZmqRelay
@@ -25,7 +25,7 @@ class DataReader(AppThread):
         self._prefix = "time"
 
     def get_data(self):
-        timestamp = make_timestamp(make_string=True)
+        timestamp = make_iso_timestamp()
         return f"{self._prefix}: {timestamp}"
 
     def run(self):
@@ -115,6 +115,7 @@ async def main():
         nanny.start()
         env_vars = list(os.environ)
         env_vars.sort()
+        log.setLevel(logging.INFO)
         log.info(
             f"Startup complete with {len(env_vars)} environment variables visible: {env_vars}."
         )
