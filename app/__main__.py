@@ -9,7 +9,13 @@ import zmq
 from tailucas_pylib import log, APP_NAME, app_config, creds
 from tailucas_pylib.datetime import make_iso_timestamp
 from tailucas_pylib.process import SignalHandler
-from tailucas_pylib.threads import thread_nanny, die, bye, shutting_down, interruptable_sleep, trigger_exception
+from tailucas_pylib.threads import (
+    thread_nanny,
+    die,
+    bye,
+    shutting_down,
+    interruptable_sleep,
+)
 from tailucas_pylib.app import AppThread, ZmqRelay
 from tailucas_pylib.zmq import zmq_term, URL_WORKER_APP, URL_WORKER_RELAY
 from tailucas_pylib.handler import exception_handler
@@ -67,9 +73,9 @@ class EventProcessor(AppThread):
             connect_url=self._zmq_url,
             socket_type=zmq.PULL,
             and_raise=True,
-            shutdown_on_error=True
+            shutdown_on_error=True,
         ) as socket:
-            log.info(f'Sink socket started for {self._zmq_url}.')
+            log.info(f"Sink socket started for {self._zmq_url}.")
             while not shutting_down:
                 data = socket.recv_pyobj()
                 log.info(f"Sink {data=}")
@@ -80,22 +86,23 @@ async def main():
     log.info(f"Locale is set to {locale.getlocale()}.")
     try:
         # sentry instrumentation
-        sentry_dsn_creds_path = app_config.get("creds", "sentry_dsn").replace('__APP_NAME__', APP_NAME)
-        log.info(f'Loading Sentry.io DSN from creds path {sentry_dsn_creds_path}...')
+        sentry_dsn_creds_path = app_config.get("creds", "sentry_dsn").replace(
+            "__APP_NAME__", APP_NAME
+        )
+        log.info(f"Loading Sentry.io DSN from creds path {sentry_dsn_creds_path}...")
         sentry_dsn = creds.get_creds(sentry_dsn_creds_path)
         sentry_sdk.init(
             dsn=sentry_dsn,
             integrations=[
                 AsyncioIntegration(),
-                SysExitIntegration(capture_successful_exits=True)
+                SysExitIntegration(capture_successful_exits=True),
             ],
-            send_default_pii=True
+            send_default_pii=True,
         )
-    except AssertionError as e:
-        log.exception(f'Cannot set up Sentry instrumentation.')
-        trigger_exception = e
+    except AssertionError:
+        log.exception("Cannot set up Sentry instrumentation.")
         bye()
-    log.info(f'Installing signal handler and starting application threads...')
+    log.info("Installing signal handler and starting application threads...")
     # ensure proper signal handling; must be main thread
     signal_handler = SignalHandler()
     event_processor = EventProcessor(zmq_url=URL_WORKER_APP)
