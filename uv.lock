@@ -39,7 +39,7 @@ dependencies = [
 requires-dist = [
     { name = "pyzmq", specifier = ">=27.0.2" },
     { name = "sentry-sdk", specifier = ">=2.37.0" },
-    { name = "tailucas-pylib", specifier = "==0.5.2" },
+    { name = "tailucas-pylib", specifier = ">=0.5.2" },
 ]
 
 [[package]]
