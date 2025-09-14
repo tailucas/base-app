@@ -25,7 +25,6 @@ tasks:
     desc: Dump container environment to local file.
     cmds:
       - rm -f .env
-      - echo 'WORK_DIR="{{.WORK_DIR}}"' >> .env
       - cmd: uv run cred_tool ENV.{{.PROJECT_NAME}} {{.PROJECT_NAME}} build | jq -r '. | to_entries[] | [.key,.value] | @tsv' | tr '\t' '=' | sed 's/=\(.*\)/="\1"/' >> .env
   docker:
     deps: [create-dot-env]
