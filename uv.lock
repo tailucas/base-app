@@ -39,7 +39,7 @@ dependencies = [
 requires-dist = [
     { name = "pyzmq", specifier = ">=27.0.2" },
     { name = "sentry-sdk", specifier = ">=2.37.0" },
-    { name = "tailucas-pylib", specifier = ">=0.5.4" },
+    { name = "tailucas-pylib", specifier = ">=0.5.6" },
 ]
 
 [[package]]
@@ -576,7 +576,7 @@ wheels = [
 
 [[package]]
 name = "tailucas-pylib"
-version = "0.5.4"
+version = "0.5.6"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
@@ -593,9 +593,9 @@ dependencies = [
     { name = "sentry-sdk" },
     { name = "simplejson" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/14/ff/63f9d5ef2235debe1edbdedc666052b8ba8d20d550b2676aedb1ae7c434a/tailucas_pylib-0.5.4.tar.gz", hash = "sha256:a58f7b97548cb43b9130133538187700cf7bb8bde14c364fcadabf7572704188", size = 19919, upload-time = "2025-09-14T09:56:19.565Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/7e/c7/102e6588c878deb2928000068b17c11849a2520a749a4b1053559e44bf99/tailucas_pylib-0.5.6.tar.gz", hash = "sha256:fe8d2fc7b315a8637b645df4d167df2c065102fa153b4a57d429fe17520528fb", size = 20564, upload-time = "2025-09-17T06:56:58.824Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/e5/9b/1e0410f0d01be15f86d028e6fe5fd60694f9fd1a8f9c700e425ba8e76073/tailucas_pylib-0.5.4-py3-none-any.whl", hash = "sha256:7247cf2341fc5424d6ff27eea2efb5377344b8075bfb59cc74046f5b3fcfd7f5", size = 26345, upload-time = "2025-09-14T09:56:18.303Z" },
+    { url = "https://files.pythonhosted.org/packages/fd/b1/43f93e9ac143b4e9a6a58203dc83b998e5cef1a63890a1538ce8ada68cae/tailucas_pylib-0.5.6-py3-none-any.whl", hash = "sha256:ffcadad2ab7b11698a4f5a04f90133795cb86078c79ba34c05ef4c4a8bce0703", size = 27253, upload-time = "2025-09-17T06:56:57.219Z" },
 ]
 
 [[package]]
