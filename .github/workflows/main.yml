@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  CONTAINER_NAME: tailucas/base-app
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -29,8 +32,8 @@ jobs:
       - name: Build container image and run project task
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/tailucas/base-app
-          cacheFrom: ghcr.io/tailucas/base-app
+          imageName: ghcr.io/${{ env.CONTAINER_NAME }}
+          cacheFrom: ghcr.io/${{ env.CONTAINER_NAME }}
           push: always
           runCmd: task
 
