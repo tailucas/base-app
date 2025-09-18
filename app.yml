@@ -4,7 +4,8 @@ version: '3'
 
 vars:
   PROJECT_NAME: base-app
-  ENCODING: UTF-8
+  CONTAINER_NAME: tailucas/base-app
+  DEVICE_NAME: app-device
   LANG: en_ZA.UTF-8
   LANGUAGE: en_ZA
-  LC_ALL: en_ZA.UTF-8
+  SYSLOG_ADDRESS: udp://localhost:514

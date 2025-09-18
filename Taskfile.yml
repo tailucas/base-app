@@ -22,26 +22,16 @@ tasks:
       - sudo chmod g+rws ./data/
       - sudo rm -f ./data/app-std* ./data/cron-std* ./data/supervisor.sock
   create-dot-env:
-    desc: Dump container environment to local file.
+    desc: Write project .env
     cmds:
-      - rm -f .env
-      - uv run cred_tool ENV.{{.PROJECT_NAME}} {{.PROJECT_NAME}} build | jq -r '. | to_entries[] | [.key,.value] | @tsv' | tr '\t' '=' | sed 's/=\(.*\)/="\1"/' >> .env
-      - test $(wc -l < .env) -ge 2
-  docker:
-    deps: [create-dot-env]
-    desc: Generate a usable docker-compose.yml for Docker build.
+      - ./dot_env_setup.sh {{.PROJECT_NAME}}
     preconditions:
       - uv -V
-      - python -V
-      - python3 -V
-      - cargo -V
-      - rustup -V
-      - test -f docker-compose.template
-    cmds:
-      - rm -f docker-compose.yml
-      - cp docker-compose.template docker-compose.yml
+      - jq -V
+      - tr --version
+      - sed --version
     generates:
-      - docker-compose.yml
+      - .env
   java:
     desc: Build Java artifacts in preparation for container build.
     preconditions:
@@ -58,16 +48,12 @@ tasks:
     cmds:
       - docker compose push
   build:
-    deps: [docker, java]
+    deps: [create-dot-env, java]
     desc: Clean up volume directory and build container image.
     preconditions:
       - docker -v
-    env:
-      D_LANG: "{{.LANG}}"
-      D_LANGUAGE: "{{.LANGUAGE}}"
-      D_LC_ALL: "{{.LC_ALL}}"
     cmds:
-      - docker compose build --progress plain
+      - docker compose --env-file .env build --progress plain
   run:
     deps: [build, datadir]
     desc: Run docker container
@@ -88,5 +74,3 @@ tasks:
       - test -d ./data/
     cmds:
       - docker compose up -d
-  connect:
-    cmd: ./connect_to_app.sh {{.DOCKER_APP}}

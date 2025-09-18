@@ -1,7 +1,6 @@
 FROM ubuntu:latest
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt-get update \
-    && apt-get install -y --no-install-recommends \
+RUN apt update \
+    && apt install -y --no-install-recommends \
         curl \
         gnupg \
         java-common \
@@ -10,12 +9,7 @@ RUN apt-get update \
         software-properties-common
 # generate correct locales
 ARG LANG
-ENV LANG ${LANG}
 ARG LANGUAGE
-ENV LANGUAGE ${LANGUAGE}
-ARG LC_ALL
-ENV LC_ALL ${LC_ALL}
-ARG ENCODING
 RUN locale-gen ${LANGUAGE} \
     && locale-gen ${LANG} \
     && update-locale \
@@ -56,7 +50,7 @@ WORKDIR /opt/app
 # configuration
 COPY app ./app
 COPY config ./config
-COPY base_setup.sh app_setup.sh ./
+COPY dot_env_setup.sh base_setup.sh app_setup.sh ./
 RUN /opt/app/base_setup.sh
 RUN /opt/app/app_setup.sh
 # user scripts
