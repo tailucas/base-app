@@ -4,6 +4,13 @@
     "customizations": {
         "vscode": {
             "extensions": [
+                "vscjava.vscode-java-pack",
+                "ms-python.python",
+                "ms-python.vscode-pylance",
+                "vadimcn.vscode-lldb",
+                "rust-lang.rust-analyzer",
+                "tamasfe.even-better-toml",
+                "amazonwebservices.amazon-q-vscode"
             ]
         }
     },
@@ -12,6 +19,7 @@
         "ghcr.io/devcontainers/features/common-utils": {},
         "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/java:1": {
+            "jdkDistro": "amzn",
             "installMaven": true
         },
         "ghcr.io/devcontainers/features/python:1": {}
