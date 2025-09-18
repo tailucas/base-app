@@ -1,0 +1,24 @@
+services:
+  app:
+    env_file: ".env"
+    image: "${CONTAINER_NAME}"
+    restart: unless-stopped
+    stop_grace_period: 45s
+    build:
+      network: host
+      context: .
+      args:
+        LANG: "${LANG}"
+        LANGUAGE: "${LANGUAGE}"
+    logging:
+      driver: syslog
+      options:
+        syslog-address: "${SYSLOG_ADDRESS}"
+        syslog-format: "rfc3164"
+        tag: "${DEVICE_NAME}"
+    tmpfs:
+    - /tmp
+    hostname: ${DEVICE_NAME}
+    volumes:
+      - ./data:/data
+      - /dev/log:/dev/log
