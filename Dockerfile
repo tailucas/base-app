@@ -1,12 +1,23 @@
 FROM ubuntu:latest
-RUN apt update \
-    && apt install -y --no-install-recommends \
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        build-essential \
+        cron \
         curl \
         gnupg \
-        java-common \
+        jq \
+        less \
         locales \
+        lsof \
         netcat-openbsd \
-        software-properties-common
+        # provides uptime
+        procps \
+        software-properties-common \
+        supervisor \
+        unzip \
+        zip \
+    && rm -rf /var/lib/apt/lists/*
 # generate correct locales
 ARG LANG
 ARG LANGUAGE
@@ -14,22 +25,10 @@ RUN locale-gen ${LANGUAGE} \
     && locale-gen ${LANG} \
     && update-locale \
     && locale -a
-RUN curl -sS https://apt.corretto.aws/corretto.key | gpg --dearmor | dd of=/etc/apt/trusted.gpg.d/corretto.gpg \
-    && add-apt-repository 'deb https://apt.corretto.aws stable main' \
-    # repeat so that it is detected; seems unrelated to async or layering issues
-    && add-apt-repository 'deb https://apt.corretto.aws stable main' \
-    && apt-get update \
-    && apt-get install -y --no-install-recommends \
-        build-essential \
-        cron \
-        java-21-amazon-corretto-jdk \
-        jq \
-        less \
-        lsof \
-        # provides uptime
-        procps \
-        supervisor \
-    && rm -rf /var/lib/apt/lists/*
+ENV SDKMAN_DIR="/opt/app/.sdkman"
+RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
+RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"
+ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
 # create no-password run-as user
 RUN groupadd -f -r -g 999 app
 # create run-as user
@@ -71,7 +70,7 @@ COPY pyproject.toml uv.lock python_setup.sh ./
 RUN chown app:app uv.lock
 # switch to run user
 USER app
-ENV PATH "${PATH}:/home/app/.local/bin:/home/app/.cargo/bin"
+ENV PATH "${PATH}:/home/app/.local/bin:/home/app/.cargo/bin:${JAVA_HOME}/bin"
 RUN /opt/app/rust_setup.sh
 RUN /opt/app/python_setup.sh
 # example HTTP backend

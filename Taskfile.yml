@@ -21,7 +21,27 @@ tasks:
       - sudo chmod 755 ./data/
       - sudo chmod g+rws ./data/
       - sudo rm -f ./data/app-std* ./data/cron-std* ./data/supervisor.sock
+  java:
+    desc: Build Java artifacts in preparation for container build.
+    preconditions:
+      - java -version
+      - javac -version
+      - mvn -v
+    cmds:
+      - mvn package
+    generates:
+      - target/app-0.1.0.jar
+  python:
+    desc: Create and initialize Python virtual environment.
+    preconditions:
+      - uv -V
+    cmds:
+      - uv python install
+      - uv sync
+    generates:
+      - .venv
   create-dot-env:
+    deps: [python]
     desc: Write project .env
     cmds:
       - ./dot_env_setup.sh {{.PROJECT_NAME}}
@@ -32,14 +52,6 @@ tasks:
       - sed --version
     generates:
       - .env
-  java:
-    desc: Build Java artifacts in preparation for container build.
-    preconditions:
-      - java -version
-      - javac -version
-      - mvn -v
-    cmds:
-      - mvn package
   push:
     deps: [build]
     desc: Push built image to Docker Hub
@@ -48,7 +60,7 @@ tasks:
     cmds:
       - docker compose push
   build:
-    deps: [create-dot-env, java]
+    deps: [create-dot-env, java, python]
     desc: Clean up volume directory and build container image.
     preconditions:
       - docker -v
