@@ -29,6 +29,7 @@ tasks:
       - mvn -v
     cmds:
       - mvn package
+      - mvn dependency:tree
     generates:
       - target/app-0.1.0.jar
   python:
