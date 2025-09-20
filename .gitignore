@@ -9,7 +9,6 @@ venv/
 *.env
 __pycache__
 *.code-workspace
-.python-version
 # Compiled class file
 *.class
 
