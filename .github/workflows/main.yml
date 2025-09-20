@@ -38,4 +38,4 @@ jobs:
           runCmd: task
 
       - name: Push project container
-        run: docker compose push
+        run: docker compose push --quiet

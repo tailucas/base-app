@@ -30,6 +30,7 @@
         "OP_CONNECT_TOKEN": "${localEnv:OP_CONNECT_TOKEN}",
         "OP_VAULT": "${localEnv:OP_VAULT}",
         "HC_PING_URL": "${localEnv:HC_PING_URL}",
+        "MAVEN_ARGS": "--no-transfer-progress",
         "UV_LINK_MODE": "copy"
     },
     "workspaceFolder": "${localWorkspaceFolder}",
