@@ -76,7 +76,7 @@ tasks:
       - docker ps | grep 1password
       - test -d ./data/
     cmds:
-      - docker compose up
+      - docker compose up --remove-orphans
   rund:
     deps: [build, datadir]
     desc: Run docker container and detach
@@ -86,4 +86,4 @@ tasks:
       - docker ps | grep 1password
       - test -d ./data/
     cmds:
-      - docker compose up -d
+      - docker compose up -d --remove-orphans
