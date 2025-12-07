@@ -2,7 +2,7 @@
 set -eu
 
 # reduce log noise for workflow builds
-if [ -n "${GITHUB_ENV:-}" ]; then
+if [ -n "${GITHUB_ACTIONS:-}" ]; then
     mvn -q package
 else
     mvn package
