@@ -1,3 +1,28 @@
+FROM ubuntu:latest AS builder
+ARG DEBIAN_FRONTEND=noninteractive
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+        curl \
+        gnupg \
+        software-properties-common \
+        unzip \
+        zip
+ENV APP_DIR /opt/app
+ENV SDKMAN_DIR="${APP_DIR}/.sdkman"
+RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
+RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"
+ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
+RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install maven"
+ENV PATH "${PATH}:$HOME/.local/bin:$HOME/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin"
+# app setup
+WORKDIR "${APP_DIR}"
+# prepare source
+COPY src ./src/
+COPY java_setup.sh pom.xml rules.xml ./
+RUN "${APP_DIR}/java_setup.sh"
+
+###############################################################################
+
 FROM ubuntu:latest
 ARG DEBIAN_FRONTEND=noninteractive
 RUN apt-get update \
@@ -25,10 +50,16 @@ RUN locale-gen ${LANGUAGE} \
     && locale-gen ${LANG} \
     && update-locale \
     && locale -a
-ENV SDKMAN_DIR="/opt/app/.sdkman"
+# environment
+ENV USER app
+ENV HOME /home/app
+ENV APP_DIR /opt/app
+ENV SDKMAN_DIR="${APP_DIR}/.sdkman"
 RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"
 ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
+RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install maven"
+ENV PATH "${PATH}:${HOME}/.local/bin:${HOME}/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin"
 # create no-password run-as user
 RUN groupadd -f -r -g 999 app
 # create run-as user
@@ -39,19 +70,18 @@ RUN adduser app video
 # cron
 RUN chmod u+s /usr/sbin/cron
 # used by pip, awscli, app
-RUN mkdir -p /home/app/.aws/ /opt/app/
+RUN mkdir -p "${HOME}/.aws/" "${APP_DIR}/"
 # file system permissions
 RUN chown app /var/log/
-RUN chown app:app /opt/app/
-RUN chown -R app:app /home/app/
+RUN chown app:app "${APP_DIR}/"
+RUN chown -R app:app "${HOME}/"
 # app setup
-WORKDIR /opt/app
+WORKDIR "$APP_DIR"
 # configuration
-COPY app ./app
 COPY config ./config
 COPY dot_env_setup.sh base_setup.sh app_setup.sh ./
-RUN /opt/app/base_setup.sh
-RUN /opt/app/app_setup.sh
+RUN "${APP_DIR}/base_setup.sh"
+RUN "${APP_DIR}/app_setup.sh"
 # user scripts
 COPY app_entrypoint.sh \
     base_entrypoint.sh \
@@ -61,18 +91,21 @@ COPY app_entrypoint.sh \
     connect_to_app.sh \
     README.md \
     ./
-# tools
-# application
-COPY ./target/app-*-jar-with-dependencies.jar ./app.jar
-COPY rust_setup.sh Cargo.toml Cargo.lock rapp rlib ./
+# Rust
+COPY rapp ./rapp
+COPY rlib ./rlib
+COPY rust_setup.sh Cargo.toml Cargo.lock ./
 RUN chown app:app Cargo.lock
-COPY pyproject.toml uv.lock python_setup.sh ./
+# Python
+COPY app ./app
+COPY python_setup.sh pyproject.toml uv.lock ./
 RUN chown app:app uv.lock
-# switch to run user
+# Java
+COPY --from=builder "${APP_DIR}/target/app-0.1.0-jar-with-dependencies.jar" ./app.jar
+# switch to run user now because uv does not use the environment to infer
 USER app
-ENV PATH "${PATH}:/home/app/.local/bin:/home/app/.cargo/bin:${JAVA_HOME}/bin"
-RUN /opt/app/rust_setup.sh
-RUN /opt/app/python_setup.sh
+RUN "${APP_DIR}/rust_setup.sh"
+RUN "${APP_DIR}/python_setup.sh"
 # example HTTP backend
 # EXPOSE 8080
 CMD ["/opt/app/entrypoint.sh"]

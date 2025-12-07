@@ -6,7 +6,6 @@ dist/
 venv/
 .venv/
 .env
-*.env
 __pycache__
 *.code-workspace
 # Compiled class file
