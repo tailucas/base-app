@@ -12,18 +12,49 @@ This Docker application was created by factoring out many reusable code artifact
 
 Enough talk! What do I get?
 
-* An Alpine Docker application that is specifically designed to act as a Docker base image for derived applications, or can be forked to run as is. This includes a variety of boilerplate entrypoint scripts that can be trivially overridden.
-* Powerful threading and inter-thread data handling functions with significant resilience to unchecked thread death.
-* Sample [Healthchecks][healthchecks-url] cron job with built-in container setup (you'd think that this would be simple and well documented).
+* An Ubuntu-based Docker application specifically designed to act as a Docker base image for derived applications, or can be run standalone. This includes boilerplate entrypoint scripts (`base_entrypoint.sh`, `app_entrypoint.sh`) that can be easily overridden.
+* Multi-language support: Python (with [uv][uv-url] dependency management), Java (Amazon Corretto 25 via SDKMan), and Rust (workspace with `rapp` and `rlib` crates).
+* Powerful threading and inter-thread data handling via [ZeroMQ][zmq-url] with significant resilience to unchecked thread death.
+* Sample [Healthchecks][healthchecks-url] integration with built-in cron job orchestration.
 * Pre-configured process control using [supervisor](http://supervisord.org/).
 * Automatic syslog configuration to log to the Docker host rsyslog.
-* Support for AWS-CLI if appropriate AWS environment variables are present, like `AWS_DEFAULT_REGION`.
-* Python dependency management using [uv][uv-url].
+* Support for AWS-CLI if appropriate AWS environment variables are present (e.g., `AWS_DEFAULT_REGION`).
+* Support for [Cronitor][cronitor-url] health check monitoring via configuration.
 
-Here is a breakdown of some of the sample application features and structure:
+### Project Architecture
 
-* [app.__init__.py](https://github.com/tailucas/base-app/blob/master/app/__init__.py): Sets a global for `APP_NAME` and `WORK_DIR` which currently assumes the location `/opt/app`.
-* [app.__main__.py](https://github.com/tailucas/base-app/blob/master/app/__main__.py): The naming of this entrypoint is intentional so that derived application containers can easily override this and existing application bootstrapping logic just works<sup>TM</sup>. After basic imports, a 1Password connect SDK [CredsConfig](https://github.com/tailucas/base-app/blob/723bbef3a4f5380d722dae52bcb52537b4e44bc1/app/__main__.py#L12) struct is instantiated which tells [pylib][pylib-url] which credentials to pull from the 1Password connect server. Next, a variety of pylib imports are done to bring the needed functionality into the application. A [ZeroMQ][zmq-url] URL is defined called `URL_WORKER_APP` for inter-thread communication using their "lockless programming" paradigm. [DataReader](https://github.com/tailucas/base-app/blob/723bbef3a4f5380d722dae52bcb52537b4e44bc1/app/__main__.py#LL41C7-L41C17) demonstrates the use of the `AppThread` and `Closeable` functions which abstract away thread instantiation, thread death tracking and bring the context manager to gracefully handle errors and shutdown. A tenet of ZeroMQ is to not share sockets between threads and is managed for you with this implementation. A few lines of code bring a lot of powerful resilience features. `DataReader` pretends to fetch some useful data and then uses its ZeroMQ `PUSH` socket to forward any to whatever has a sink URL to `URL_WORKER_APP`. [EventProcessor](https://github.com/tailucas/base-app/blob/723bbef3a4f5380d722dae52bcb52537b4e44bc1/app/__main__.py#LL64C7-L64C21) illustrates the consumer which is analogous to the main application loop. The [main](https://github.com/tailucas/base-app/blob/723bbef3a4f5380d722dae52bcb52537b4e44bc1/app/__main__.py#L78) entrypoint instantiates these classes, echoes some environment variable keys to the log that are visible to the application which is useful for debugging environment bootstrap. All threads wait on a Python `threading.Event` object for quick shutdown should the signal arrive. When set, the main application and all non-daemon threads have a chance to complete, aided by a [helper](https://github.com/tailucas/base-app/blob/723bbef3a4f5380d722dae52bcb52537b4e44bc1/app/__main__.py#L110). Another helper routine [zmq_term](https://github.com/tailucas/base-app/blob/723bbef3a4f5380d722dae52bcb52537b4e44bc1/app/__main__.py#L109) helps with getting ZeroMQ shutdown done. By design *ALL* ZeroMQ sockets must be closed gracefully in order for the application to exit. Any non-trivial applications need active management of sockets to avoid spending hours working out why the application shutdown is blocked. This is one of a few powerful features of this application and package.
+The project is organized into multiple language components:
+
+**Python Application** (`app/`)
+* [app.__main__.py](app/__main__.py): The primary application entrypoint using `asyncio`. Demonstrates [ZeroMQ][zmq-url]-based inter-thread communication patterns.
+  - `DataReader`: Example thread that generates data and pushes it via ZeroMQ
+  - `DataRelay`: Demonstrates the `ZmqRelay` pattern for message transformation
+  - `EventProcessor`: Example consumer thread that receives and processes data
+* Uses [tailucas_pylib][pylib-url] for common utilities including threading, configuration, credentials management, and ZeroMQ helpers
+* Integrates [Sentry][sentry-url] for error tracking
+* Managed dependencies via [uv][uv-url] (see [pyproject.toml](pyproject.toml))
+
+**Java Application** (`src/`)
+* Maven-based build using Java 25 (Amazon Corretto)
+* Compiled as part of the Docker build into an executable JAR (`app.jar`)
+* Example application in `src/main/java/tailucas/app/App.java`
+
+**Rust Components** (`rapp/`, `rlib/`)
+* `rlib/`: Shared Rust library with utility functions
+* `rapp/`: Example Rust application demonstrating library usage
+* Built as part of container initialization (see [rust_setup.sh](rust_setup.sh))
+
+**Configuration & Orchestration**
+* `config/supervisord.conf`: Process supervision configuration for running multiple services
+* `config/app.conf`: Application configuration with credential references
+* `config/cron/`: Crontab entries for scheduled jobs
+* `entrypoint.sh`: Orchestrates base setup, app setup, and supervisor startup
+
+The sample Python application demonstrates key resilience patterns:
+* Thread lifecycle management with automatic death tracking via `thread_nanny`
+* [ZeroMQ][zmq-url] "lockless programming" for safe inter-thread communication
+* Graceful shutdown with signal handling and socket cleanup
+* Configuration and credential management via 1Password Secrets Automation
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -59,7 +90,7 @@ Here is some detail about the intended use of this package.
 
 ### Prerequisites
 
-Beyond the Python dependencies defined in the [project configuration](pyproject.toml), the package init carries hardcoded dependencies on [Sentry][sentry-url] and [1Password][1p-url] in order to function. Unless you want these and are effectively extending my [base project][baseapp-url], you're likely better off forking this package and cutting out what you do not need.
+Beyond the Python dependencies defined in the [project configuration](pyproject.toml), the application has runtime dependencies on [Sentry][sentry-url] and [1Password][1p-url] for secrets management. The application also includes Java (using Amazon Corretto via SDKMan) and Rust components. Unless you want these integrations and are extending this [base project][baseapp-url], you're likely better off forking this package and cutting out what you do not need.
 
 ### Required Tools
 Install these tools and make sure that they are on the environment `$PATH`.
@@ -70,42 +101,92 @@ Install these tools and make sure that they are on the environment `$PATH`.
 * `mvn` Maven for Java build orchestration: https://maven.apache.org/download.cgi
 * `uv` for Python dependency management: https://docs.astral.sh/uv/getting-started/installation/
 
-* `java` and `javac` for Java build and runtime: https://aws.amazon.com/corretto/
-* `python` is `python3` for Python runtime: https://www.python.org/downloads/
+* `java` and `javac` for Java build and runtime: Amazon Corretto or similar JDK
+* `python3` for Python runtime: https://www.python.org/downloads/
+* `cargo` and `rustc` for Rust build and runtime: https://www.rust-lang.org/tools/install
 
 ### Installation
 
-0. :stop_sign: This project uses [1Password Secrets Automation][1p-url] to store both application key-value pairs as well as runtime secrets. It is assumed that the connect server containers are already running on your environment. If you do not want to use this, then you'll need to fork this package and make the changes as appropriate. It's actually very easy to set up, but note that 1Password is a paid product with a free-tier for secrets automation. Here is an example of how this looks for my application and the generation of the docker-compose.yml relies on this step. Your secrets automation vault must contain an entry called `ENV.base_app` with these keys:
+0. :stop_sign: This project uses [1Password Secrets Automation][1p-url] to store both application configuration and runtime secrets. It is assumed that the 1Password Connect server container is already running in your environment. If you do not want to use this, fork this package and adapt the configuration management accordingly. 1Password is a paid product with a free tier for secrets automation. 
 
-* `DEVICE_NAME`: For naming the container. This project uses `base-app`.
-* `APP_NAME`: Used for referencing the application's actual name for the logger. This project uses `base_app`.
-* `OP_CONNECT_HOST`, `OP_CONNECT_TOKEN`, `OP_CONNECT_VAULT`: Used to specify the URL of the 1Password connect server with associated client token and Vault ID. See [1Password](https://developer.1password.com/docs/connect/get-started#step-1-set-up-a-secrets-automation-workflow) for more.
-* `HC_PING_URL`: [Healthchecks][healthchecks-url] URL of this application's current health check status.
+   Your 1Password Secrets Automation vault must contain an entry called `ENV.base_app` with these minimum keys:
+   * `DEVICE_NAME`: For container naming. Default: `base-app`
+   * `APP_NAME`: Application name for logging. Default: `base_app`
+   * `OP_CONNECT_HOST`, `OP_CONNECT_TOKEN`, `OP_CONNECT_VAULT`: 1Password Connect server configuration
+   * `HC_PING_URL`: [Healthchecks][healthchecks-url] URL for health check status reporting
+   * `CRONITOR_MONITOR_KEY`: [Cronitor][cronitor-url] API key for cron job monitoring (optional)
 
-With these configured, you are now able to build the application.
-
-In addition to this, [additional runtime configuration](https://github.com/tailucas/base-app/blob/d4e5b0bcaabfb5f29094a1c977d1027e38549bad/app/__main__.py#L12-L14) is used by the application, and also need to be contained within the secrets vault. With these configured, you are now able to run the application.
+   Additionally, the application requires:
+   * `Sentry/__APP_NAME__/dsn`: [Sentry][sentry-url] DSN for error tracking (see [app.conf](config/app.conf))
 
 1. Clone the repo
    ```sh
    git clone https://github.com/tailucas/base-app.git
+   cd base-app
    ```
-2. Start a [devcontainer](https://containers.dev/).
+
+2. Start the development container
    ```sh
    make
    ```
-3. Now generate the project container:
+   This uses [Dev Container CLI](https://code.visualstudio.com/docs/devcontainers/devcontainer-cli) to set up a development environment with Python, Java, Rust, and Docker-in-Docker capabilities.
+
+3. Inside the development container, build the project artifacts
    ```sh
    task build
    ```
-4. If successful and the local environment is running the 1Password connect containers, run the application. For foreground:
+   This builds Java components with Maven and prepares the Docker image.
+
+4. Configure the application by generating the `.env` file with secrets from 1Password
+   ```sh
+   task configure
+   ```
+   This creates the runtime configuration needed by the application.
+
+5. Run the application:
+   
+   For foreground (interactive, see logs in real-time):
    ```sh
    task run
    ```
-   For background (this works together with the devcontainer `docker-outside-of-docker` option meaning that the host system is now running your project and how you can exit the dev container and remove it without affecting your running container):
+   
+   For background (detached mode):
    ```sh
    task rund
    ```
+   
+   The background mode works with Docker-out-of-Docker, allowing you to exit the dev container without stopping the running application.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Build System
+
+The project uses a task-based build system:
+
+* **[Taskfile.yml](Taskfile.yml)**: Primary build orchestration using [task](https://taskfile.dev/). Key tasks:
+  - `task build`: Build Docker container image
+  - `task run`: Run container in foreground with full output
+  - `task rund`: Run container detached in background
+  - `task configure`: Generate runtime `.env` file from 1Password secrets
+  - `task java`: Build Java artifacts (requires Java 21+, Maven, and `javac`)
+  - `task python`: Initialize Python virtual environment with [uv][uv-url]
+  - `task datadir`: Create and configure shared data directory
+
+* **[Makefile](Makefile)**: Development container setup
+  - `make` (or `make dev`): Build and enter development container
+  - `make check`: Verify required tools are installed
+
+* **[Dockerfile](Dockerfile)**: Multi-stage Docker build
+  - **Builder stage**: Compiles Java artifacts using Maven and Amazon Corretto 25
+  - **Runtime stage**: Ubuntu-based with Java, Python 3.12+, Rust, supervisor, cron, and syslog support
+  - User `app` (UID 999) runs the application with appropriate permissions
+
+* **.devcontainer**: VS Code dev container configuration with Docker-out-of-Docker, Python, Java, and Rust support
+
+* **GitHub Actions** ([.github/workflows/main.yml](.github/workflows/main.yml)): Automated multi-architecture builds
+  - Builds for `linux/amd64` and `linux/arm64`
+  - Pushes to Docker Hub (`docker.io/tailucas/base-app`) and GitHub Container Registry (`ghcr.io/tailucas/base-app`)
+  - Triggered on push to main branch or manual dispatch
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -132,8 +213,6 @@ Distributed under the MIT License. See [LICENSE](LICENSE) for more information.
 * [All the Shields](https://github.com/progfay/shields-with-icon)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
-[![Hits](https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgithub.com%2Ftailucas%2Fbase-app%2F&count_bg=%2379C83D&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=visits&edge_flat=true)](https://hits.seeyoufarm.com)
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
