@@ -32,8 +32,6 @@ command=uv run app
 directory=/opt/app/
 user=app
 autorestart=unexpected
-stdout_syslog=true
-stderr_syslog=true
 stopwaitsecs=30
 EOF
 fi
@@ -47,8 +45,6 @@ command=cargo run --release
 directory=/opt/app/
 user=app
 autorestart=unexpected
-stdout_syslog=true
-stderr_syslog=true
 stopwaitsecs=30
 startsecs=0
 EOF
@@ -63,8 +59,6 @@ command=java -jar app.jar
 directory=/opt/app/
 user=app
 autorestart=unexpected
-stdout_syslog=true
-stderr_syslog=true
 stopwaitsecs=30
 EOF
 fi
