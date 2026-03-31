@@ -38,7 +38,7 @@ dependencies = [
 requires-dist = [
     { name = "pyzmq", specifier = ">=27.0.2" },
     { name = "sentry-sdk", specifier = ">=2.37.0" },
-    { name = "tailucas-pylib", specifier = ">=0.5.6" },
+    { name = "tailucas-pylib", specifier = ">=0.6.3" },
 ]
 
 [[package]]
@@ -621,7 +621,7 @@ wheels = [
 
 [[package]]
 name = "tailucas-pylib"
-version = "0.6.2"
+version = "0.6.3"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "boto3" },
@@ -638,9 +638,9 @@ dependencies = [
     { name = "simplejson" },
     { name = "u-msgpack-python" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/16/8b/bb1eaf1190314328e04fc09c0f43add1b6015c4fbb2f637fab6d9ce44227/tailucas_pylib-0.6.2.tar.gz", hash = "sha256:3f39e51761c76f94550b0f0ac9930a7c585cb5ba5ca39a1cc29c88347958a180", size = 20718, upload-time = "2026-03-30T08:56:55.548Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/d6/7e/0ffd8f3fb512ccfa9d144f52bf704890f2b622d1fc6b8d9119ad1e2228f3/tailucas_pylib-0.6.3.tar.gz", hash = "sha256:7172add7131c9b68e0ad5d7cdd98876718fea7eee7f5a6689b01f5ec5e41a0be", size = 20750, upload-time = "2026-03-31T13:52:47.888Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/34/5f/c6ec58823b4adca62a1055156b1004dacec9d08e915af596e2a5d1a26616/tailucas_pylib-0.6.2-py3-none-any.whl", hash = "sha256:b00a7f3465bb026648d4ec9995d58434cb1e2a193bc29e386051dd0dd0ce7b8b", size = 27452, upload-time = "2026-03-30T08:56:53.912Z" },
+    { url = "https://files.pythonhosted.org/packages/b2/b5/4db0a74e6226604707ecffb92ce0a80bbed68a2c5dca23e0356c9a8ca9da/tailucas_pylib-0.6.3-py3-none-any.whl", hash = "sha256:300a1d12d71eef84a4b0af6b6cfa310d40f7ed6329962823a0789ae949e2cbe3", size = 27489, upload-time = "2026-03-31T13:52:46.305Z" },
 ]
 
 [[package]]
