@@ -10,23 +10,25 @@
                 "vadimcn.vscode-lldb",
                 "rust-lang.rust-analyzer",
                 "tamasfe.even-better-toml",
-                "amazonwebservices.amazon-q-vscode"
+                "golang.go"
             ]
         }
     },
     "features": {
-        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {},
+        "ghcr.io/devcontainers/features/docker-outside-of-docker:1": {
+            "moby": false
+        },
         "ghcr.io/devcontainers/features/common-utils": {},
         "ghcr.io/devcontainers/features/rust:1": {},
         "ghcr.io/devcontainers/features/java:1": {
             "jdkDistro": "amzn",
             "installMaven": true
         },
-        "ghcr.io/devcontainers/features/python:1": {}
+        "ghcr.io/devcontainers/features/python:1": {},
+        "ghcr.io/devcontainers/features/go:1": {}
     },
     "containerEnv": {
         "OP_SERVICE_ACCOUNT_TOKEN": "${localEnv:OP_SERVICE_ACCOUNT_TOKEN}",
-        "OP_CONNECT_HOST": "${localEnv:OP_CONNECT_HOST}",
         "OP_CONNECT_TOKEN": "${localEnv:OP_CONNECT_TOKEN}",
         "OP_VAULT": "${localEnv:OP_VAULT}",
         "HC_PING_URL": "${localEnv:HC_PING_URL}",
@@ -34,6 +36,5 @@
         "UV_LINK_MODE": "copy"
     },
     "workspaceFolder": "${localWorkspaceFolder}",
-    "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind",
-    "runArgs": ["--network=host"]
+    "workspaceMount": "source=${localWorkspaceFolder},target=${localWorkspaceFolder},type=bind"
 }

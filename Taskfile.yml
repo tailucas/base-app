@@ -40,6 +40,16 @@ tasks:
       - uv sync
     generates:
       - .venv
+  golang:
+    desc: Create and initialize Go virtual environment.
+    preconditions:
+      - go version
+    cmds:
+      - go mod init
+      - go mod tidy
+    generates:
+      - go.mod
+      - go.sum
   configure:
     desc: Create runtime configuration.
     deps: [build]

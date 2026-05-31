@@ -13,7 +13,7 @@ RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"
 ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install maven"
-ENV PATH "${PATH}:$HOME/.local/bin:$HOME/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin"
+ENV PATH "${PATH}:$HOME/.local/bin:$HOME/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin:/usr/local/go/bin"
 # app setup
 WORKDIR "${APP_DIR}"
 # prepare source
@@ -59,7 +59,7 @@ RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"
 ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install maven"
-ENV PATH "${PATH}:${HOME}/.local/bin:${HOME}/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin"
+ENV PATH "${PATH}:${HOME}/.local/bin:${HOME}/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin:/usr/local/go/bin"
 # create no-password run-as user
 RUN groupadd -f -r -g 999 app
 # create run-as user
@@ -91,6 +91,9 @@ COPY app_entrypoint.sh \
     connect_to_app.sh \
     README.md \
     ./
+# Go
+COPY go_setup.sh ./
+COPY internal ./internal
 # Rust
 COPY rapp ./rapp
 COPY rlib ./rlib
@@ -102,6 +105,7 @@ COPY python_setup.sh pyproject.toml uv.lock ./
 RUN chown app:app uv.lock
 # Java
 COPY --from=builder "${APP_DIR}/target/app-0.1.0-jar-with-dependencies.jar" ./app.jar
+RUN "${APP_DIR}/go_setup.sh"
 # switch to run user now because uv does not use the environment to infer
 USER app
 RUN "${APP_DIR}/rust_setup.sh"

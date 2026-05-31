@@ -33,6 +33,13 @@ directory=/opt/app/
 user=app
 autorestart=unexpected
 stopwaitsecs=30
+stdout_events_enabled=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_events_enabled=true
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+redirect_stderr=false
 EOF
 fi
 
@@ -47,6 +54,13 @@ user=app
 autorestart=unexpected
 stopwaitsecs=30
 startsecs=0
+stdout_events_enabled=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_events_enabled=true
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+redirect_stderr=false
 EOF
 fi
 
@@ -60,5 +74,32 @@ directory=/opt/app/
 user=app
 autorestart=unexpected
 stopwaitsecs=30
+stdout_events_enabled=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_events_enabled=true
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+redirect_stderr=false
+EOF
+fi
+
+# add optional Java application
+if [ "${RUN_GO_APP:-}" == "true" ]; then
+  cat << EOF >> /opt/app/supervisord.conf
+[program:gapp]
+priority=2
+command=go run ./internal/main.go
+directory=/opt/app/
+user=app
+autorestart=unexpected
+stopwaitsecs=30
+stdout_events_enabled=true
+stdout_logfile=/dev/stdout
+stdout_logfile_maxbytes=0
+stderr_events_enabled=true
+stderr_logfile=/dev/stderr
+stderr_logfile_maxbytes=0
+redirect_stderr=false
 EOF
 fi
