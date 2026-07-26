@@ -95,7 +95,7 @@ Beyond the Python dependencies defined in the [project configuration](pyproject.
 ### Required Tools
 Install these tools and make sure that they are on the environment `$PATH`.
 
-* `task` for project build orchestration: https://taskfile.dev/installation/#install-script
+* `make` for project build orchestration (GNU Make): https://www.gnu.org/software/make/
 
 * `docker` and `docker-compose` for container builds and execution: https://docs.docker.com/engine/install/
 * `mvn` Maven for Java build orchestration: https://maven.apache.org/download.cgi
@@ -127,19 +127,19 @@ Install these tools and make sure that they are on the environment `$PATH`.
 
 2. Start the development container
    ```sh
-   make
+   make dev
    ```
    This uses [Dev Container CLI](https://code.visualstudio.com/docs/devcontainers/devcontainer-cli) to set up a development environment with Python, Java, Rust, and Docker-in-Docker capabilities.
 
 3. Inside the development container, build the project artifacts
    ```sh
-   task build
+   make build
    ```
    This builds Java components with Maven and prepares the Docker image.
 
 4. Configure the application by generating the `.env` file with secrets from 1Password
    ```sh
-   task configure
+   make configure
    ```
    This creates the runtime configuration needed by the application.
 
@@ -147,12 +147,12 @@ Install these tools and make sure that they are on the environment `$PATH`.
    
    For foreground (interactive, see logs in real-time):
    ```sh
-   task run
+   make run
    ```
    
    For background (detached mode):
    ```sh
-   task rund
+   make rund
    ```
    
    The background mode works with Docker-out-of-Docker, allowing you to exit the dev container without stopping the running application.
@@ -161,19 +161,17 @@ Install these tools and make sure that they are on the environment `$PATH`.
 
 ## Build System
 
-The project uses a task-based build system:
+The project uses a make-based build system:
 
-* **[Taskfile.yml](Taskfile.yml)**: Primary build orchestration using [task](https://taskfile.dev/). Key tasks:
-  - `task build`: Build Docker container image
-  - `task run`: Run container in foreground with full output
-  - `task rund`: Run container detached in background
-  - `task configure`: Generate runtime `.env` file from 1Password secrets
-  - `task java`: Build Java artifacts (requires Java 21+, Maven, and `javac`)
-  - `task python`: Initialize Python virtual environment with [uv][uv-url]
-  - `task datadir`: Create and configure shared data directory
-
-* **[Makefile](Makefile)**: Development container setup
-  - `make` (or `make dev`): Build and enter development container
+* **[Makefile](Makefile)**: Single entry point for build orchestration and development container setup. Run `make help` to list all targets. Key targets:
+  - `make build`: Build Docker container image
+  - `make run`: Run container in foreground with full output
+  - `make rund`: Run container detached in background
+  - `make configure`: Generate runtime `.env` file from 1Password secrets
+  - `make java`: Build Java artifacts (requires Java 21+, Maven, and `javac`)
+  - `make python`: Initialize Python virtual environment with [uv][uv-url]
+  - `make datadir`: Create and configure shared data directory
+  - `make dev`: Build and enter the development container (host only)
   - `make check`: Verify required tools are installed
 
 * **[Dockerfile](Dockerfile)**: Multi-stage Docker build
@@ -187,6 +185,22 @@ The project uses a task-based build system:
   - Builds for `linux/amd64` and `linux/arm64`
   - Pushes to Docker Hub (`docker.io/tailucas/base-app`) and GitHub Container Registry (`ghcr.io/tailucas/base-app`)
   - Triggered on push to main branch or manual dispatch
+
+### Makefile Features
+
+The [Makefile](Makefile) encodes the project's build graph, not just a list of commands. Derived applications reuse this same skeleton. Notable behaviors:
+
+* **Self-documenting**: Running `make` with no arguments (or `make help`) lists every target with a one-line description, extracted from the `##` comments alongside each target.
+* **Incremental builds via real file targets**: Generated artifacts — `.env`, `data/`, `.venv`, the Java jar, `go.mod`/`go.sum` — are modeled as file targets and are only rebuilt when missing or when their inputs change. Repeated `make run` invocations skip them entirely.
+  - `.env` regenerates only when `base.env` or `docker-compose.yml` changes, and is sanity-checked with a minimum line count.
+  - `.venv` re-syncs only when `pyproject.toml` or `uv.lock` changes.
+  - `target/app-0.1.0-jar-with-dependencies.jar` rebuilds when `pom.xml` or any Java source under `src/` changes.
+* **Failure safety**: `.DELETE_ON_ERROR` deletes the partial output of a failed recipe (e.g. an interrupted `make configure`), so a stale artifact can never look up-to-date.
+* **Ordered prerequisites**: `make run` resolves `data/` → `build` → `.env` in order before starting the container, mirroring the intended setup flow. Prerequisite order is only guaranteed for serial builds — do not use `make -j`.
+* **Inlined preconditions**: Tool checks (`docker`, `uv`, `java`/`javac`/`mvn`, `go`) and environment checks (a running 1Password Connect container) fail fast with clear messages before any work is done.
+* **Parameterized ownership**: The data directory is owned by `USER_ID`:`GROUP_ID` (default `999:999`, the in-container `app` user) when first created; override per invocation, e.g. `make datadir USER_ID=1000 GROUP_ID=1000`.
+* **Host vs. container awareness**: `make dev`, `dev-build` and `dev-up` manage the VS Code dev container and are guarded by `make check`, which refuses to run *inside* the container. All other targets work identically on the host or in the dev container via Docker-outside-of-Docker.
+* **Multi-language artifact builds**: `make java` (Maven package and dependency tree) and `make golang` (Go module initialization) build host-side artifacts independently of the image build, which compiles the same artifacts in its own builder stages.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
