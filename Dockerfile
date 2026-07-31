@@ -10,7 +10,7 @@ RUN apt-get update \
 ENV APP_DIR /opt/app
 ENV SDKMAN_DIR="${APP_DIR}/.sdkman"
 RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
-RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"
+RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 26-amzn"
 ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install maven"
 ENV PATH "${PATH}:$HOME/.local/bin:$HOME/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin:/usr/local/go/bin"
@@ -58,7 +58,7 @@ ENV APP_DIR /opt/app
 ENV UV_NO_DEFAULT_GROUPS=1
 ENV SDKMAN_DIR="${APP_DIR}/.sdkman"
 RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
-RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"
+RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 26-amzn"
 ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install maven"
 ENV PATH "${PATH}:${HOME}/.local/bin:${HOME}/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin:/usr/local/go/bin"
