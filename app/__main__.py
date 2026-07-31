@@ -6,7 +6,8 @@ import os
 import threading
 import zmq
 
-from tailucas_pylib import log, APP_NAME, app_config, creds
+from tailucas_pylib import log, APP_NAME, app_config
+from tailucas_pylib.creds import Creds
 from tailucas_pylib.datetime import make_iso_timestamp
 from tailucas_pylib.process import SignalHandler
 from tailucas_pylib.threads import (
@@ -90,6 +91,8 @@ async def main():
             "__APP_NAME__", APP_NAME
         )
         log.info(f"Loading Sentry.io DSN from creds path {sentry_dsn_creds_path}...")
+        creds = Creds()
+        creds.validate_creds()
         sentry_dsn = creds.get_creds(sentry_dsn_creds_path)
         sentry_sdk.init(
             dsn=sentry_dsn,
