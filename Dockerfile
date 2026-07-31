@@ -72,10 +72,10 @@ RUN adduser app video
 # cron
 RUN chmod u+s /usr/sbin/cron
 # used by pip, awscli, app
-RUN mkdir -p "${HOME}/.aws/" "${APP_DIR}/"
+RUN mkdir -p "${HOME}/.aws/" "${HOME}/.local/" "${APP_DIR}/" "${APP_DIR}/.config/uv"
 # file system permissions
 RUN chown app /var/log/
-RUN chown app:app "${APP_DIR}/"
+RUN chown -R app:app "${APP_DIR}/"
 RUN chown -R app:app "${HOME}/"
 # app setup
 WORKDIR "$APP_DIR"
