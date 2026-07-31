@@ -54,6 +54,8 @@ RUN locale-gen ${LANGUAGE} \
 ENV USER app
 ENV HOME /home/app
 ENV APP_DIR /opt/app
+# production base image: uv installs main dependencies only (ignore default dependency groups)
+ENV UV_NO_DEFAULT_GROUPS=1
 ENV SDKMAN_DIR="${APP_DIR}/.sdkman"
 RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
 RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 25-amzn"

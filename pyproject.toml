@@ -11,7 +11,7 @@ requires-python = ">=3.12"
 dependencies = [
     "pyzmq>=27.0.2",
     "sentry-sdk>=2.37.0",
-    "tailucas-pylib>=0.6.3",
+    "tailucas-pylib>=0.7.4",
 ]
 
 [build-system]
@@ -21,6 +21,14 @@ build-backend = "uv_build"
 [tool.uv.build-backend]
 module-name = "app"
 module-root = ""
+
+
+[dependency-groups]
+dev = [
+    "ruff",
+    "mypy",
+    "pytest",
+]
 
 [project.scripts]
 cred_tool = "tailucas_pylib.tools.cred_tool:main"
