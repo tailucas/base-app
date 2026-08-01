@@ -12,4 +12,4 @@ set -e
 uv python install
 uv sync --no-dev
 uv tree
-uv run python -c "import platform;import sys;print(f'{sys.version} on {platform.platform()} {platform.uname()}')"
+uv run --frozen --no-sync python -c "import platform;import sys;print(f'{sys.version} on {platform.platform()} {platform.uname()}')"
