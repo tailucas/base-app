@@ -90,7 +90,7 @@ dev = [
 requires-dist = [
     { name = "pyzmq", specifier = ">=27.0.2" },
     { name = "sentry-sdk", specifier = ">=2.37.0" },
-    { name = "tailucas-pylib", extras = ["creds", "monitoring", "mq"], specifier = ">=0.7.4" },
+    { name = "tailucas-pylib", extras = ["creds", "monitoring", "mq"], specifier = ">=0.7.5" },
 ]
 
 [package.metadata.requires-dev]
@@ -852,16 +852,16 @@ wheels = [
 
 [[package]]
 name = "tailucas-pylib"
-version = "0.7.4"
+version = "0.7.5"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "python-dateutil" },
     { name = "pytz" },
     { name = "pyyaml" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/b2/c6/8a70b15048572af98a02343b30c3a45b24d3db2d66fa8c69a7ca2a2aac57/tailucas_pylib-0.7.4.tar.gz", hash = "sha256:4749b05a673ec32730846b2339aba5d6147c5115e14efffcabba25abedda71f7", size = 21647, upload-time = "2026-07-31T06:05:58.334Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/bc/70/87b4be2d62e1fc183f7b463925a420de0de782e12ffd67f7f6b0b18865c8/tailucas_pylib-0.7.5.tar.gz", hash = "sha256:e18e06768f9ed1eecf1a0efa1dc417712455ca36b9a9a8e1c9e0817dd877b38b", size = 21521, upload-time = "2026-08-02T07:19:11.889Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/b9/29/a16527f13e92a2e5f0a63ec653863659c27590d6804c72f33d2c79963ae2/tailucas_pylib-0.7.4-py3-none-any.whl", hash = "sha256:2a659d8daca989099fbc4d42b1832da0e2e6bc4cdb2ad20c4bd9b4d9f9dedd6a", size = 27597, upload-time = "2026-07-31T06:05:56.854Z" },
+    { url = "https://files.pythonhosted.org/packages/7f/2c/0c0e0bab35ae9c63ea3b92331f05295372bc7017a9762441298fdc9384e4/tailucas_pylib-0.7.5-py3-none-any.whl", hash = "sha256:a6e66c2db865dbdf716154eaf4b5dbfc23273312a270b48a5e2205c8f554cef9", size = 27415, upload-time = "2026-08-02T07:19:10.429Z" },
 ]
 
 [package.optional-dependencies]
