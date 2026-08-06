@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <JsonTemplateLayout eventTemplateUri="classpath:LogstashJsonEventLayoutV1.json"/>
+        </Console>
+        <!-- To enable syslog shipping, define the SYSLOG_HOST environment
+             variable and uncomment this appender and its AppenderRef below:
+        <Syslog name="Syslog" format="RFC5424" host="${env:SYSLOG_HOST}" port="514" protocol="UDP" appName="${env:APP_NAME}" facility="LOCAL0" />
+        -->
+    </Appenders>
+    <Loggers>
+        <Root level="${env:LOG_LEVEL:-INFO}">
+            <AppenderRef ref="Console"/>
+            <!-- <AppenderRef ref="Syslog" level="INFO"/> -->
+        </Root>
+    </Loggers>
+</Configuration>

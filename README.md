@@ -202,6 +202,25 @@ The [Makefile](Makefile) encodes the project's build graph, not just a list of c
 * **Host vs. container awareness**: `make dev`, `dev-build` and `dev-up` manage the VS Code dev container and are guarded by `make check`, which refuses to run *inside* the container. All other targets work identically on the host or in the dev container via Docker-outside-of-Docker.
 * **Multi-language artifact builds**: `make java` (Maven package and dependency tree) and `make golang` (Go module initialization) build host-side artifacts independently of the image build, which compiles the same artifacts in its own builder stages.
 
+### Upgrading Java Dependencies
+
+The project uses the [versions-maven-plugin](https://www.mojohaus.org/versions/versions-maven-plugin/) to manage dependency and plugin versions. Version properties are defined in `pom.xml` and upgrade rules are in `rules.xml`.
+
+**Check for available updates** (does not modify `pom.xml`):
+```sh
+mvn versions:display-dependency-updates versions:display-plugin-updates
+```
+
+**Apply available updates to version properties** (modifies `pom.xml`):
+```sh
+mvn versions:update-properties
+```
+
+After upgrading, rebuild and test:
+```sh
+make java
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- USAGE EXAMPLES -->

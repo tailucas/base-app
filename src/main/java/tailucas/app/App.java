@@ -20,10 +20,10 @@ public class App
         Runtime.getRuntime().addShutdownHook(new Thread("shutdown hook") {
             public void run() {
                 try {
-                    log.info("triggered");
+                    log.atInfo().setMessage("Shutdown hook triggered").log();
                     mainThread.join();
                 } catch (InterruptedException ex) {
-                    log.error(ex.getMessage(), ex);
+                    log.atError().setMessage("Interrupted while waiting for main thread").setCause(ex).log();
                 }
             }
         });
@@ -34,25 +34,39 @@ public class App
         Thread.currentThread().setName("main");
         registerShutdownHook();
         final Locale locale = Locale.getDefault();
-        log.info("Locale: {} {}", locale.getLanguage(), locale.getCountry());
+        log.atInfo().setMessage("Locale")
+            .addKeyValue("language", locale.getLanguage())
+            .addKeyValue("country", locale.getCountry())
+            .log();
         final Map<String, String> envVars = System.getenv();
-        log.info("Environment variable keys: {}", envVars.keySet());
-        log.info( "Java runtime: " + Runtime.version().toString() );
+        log.atInfo().setMessage("Environment variables")
+            .addKeyValue("env_var_keys", envVars.keySet())
+            .log();
+        log.atInfo().setMessage("Java runtime")
+            .addKeyValue("java_version", Runtime.version().toString())
+            .log();
         Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
         for (Thread thread : threadSet) {
-            log.info("{} daemon? {}", thread.getName(), thread.isDaemon());
+            log.atInfo().setMessage("Thread")
+                .addKeyValue("thread_name", thread.getName())
+                .addKeyValue("daemon", thread.isDaemon())
+                .log();
         }
-        log.info("Working directory: " + System.getProperty("user.dir"));
+        log.atInfo().setMessage("Working directory")
+            .addKeyValue("work_dir", System.getProperty("user.dir"))
+            .log();
         try {
             Ini appConfig = new Ini(new File("./app.conf"));
-            log.info("App Device Name: " + appConfig.get("app", "device_name"));
+            log.atInfo().setMessage("App Device Name")
+                .addKeyValue("device_name", appConfig.get("app", "device_name"))
+                .log();
         } catch (IOException e) {
-            log.error(e.getMessage(), e);
+            log.atError().setMessage("Cannot read application configuration").setCause(e).log();
         }
         try {
             Thread.sleep(2*1000);
         } catch (InterruptedException e) {
-            log.error(e.getMessage(), e);
+            log.atError().setMessage("Interrupted during sleep").setCause(e).log();
         }
     }
 }

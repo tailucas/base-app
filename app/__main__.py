@@ -44,7 +44,7 @@ class DataReader(AppThread):
         ) as socket:
             while not shutting_down:
                 data = self.get_data()
-                log.info(f"Source {data=}")
+                log.info("Source data generated", extra={"data": data})
                 socket.send_pyobj(data)
                 interruptable_sleep.wait(2)
 
@@ -59,7 +59,7 @@ class DataRelay(ZmqRelay):
 
     def process_message(self, sink_socket):
         data = self.socket.recv_pyobj()
-        log.info(f"Relay {data=}")
+        log.info("Relay data received", extra={"data": data})
         sink_socket.send_pyobj(data)
 
 
@@ -76,21 +76,27 @@ class EventProcessor(AppThread):
             and_raise=True,
             shutdown_on_error=True,
         ) as socket:
-            log.info(f"Sink socket started for {self._zmq_url}.")
+            log.info("Sink socket started", extra={"zmq_url": self._zmq_url})
             while not shutting_down:
                 data = socket.recv_pyobj()
-                log.info(f"Sink {data=}")
+                log.info("Sink data received", extra={"data": data})
 
 
 async def main():
-    log.info(f"Log level is set to {logging.getLevelName(log.getEffectiveLevel())}")
-    log.info(f"Locale is set to {locale.getlocale()}.")
+    log.info(
+        "Log level configured",
+        extra={"log_level": logging.getLevelName(log.getEffectiveLevel())},
+    )
+    log.info("Locale configured", extra={"locale": locale.getlocale()})
     try:
         # sentry instrumentation
         sentry_dsn_creds_path = app_config.get("creds", "sentry_dsn").replace(
             "__APP_NAME__", APP_NAME
         )
-        log.info(f"Loading Sentry.io DSN from creds path {sentry_dsn_creds_path}...")
+        log.info(
+            "Loading Sentry.io DSN from creds path",
+            extra={"creds_path": sentry_dsn_creds_path},
+        )
         creds = Creds()
         creds.validate_creds()
         sentry_dsn = creds.get_creds(sentry_dsn_creds_path)
@@ -116,7 +122,8 @@ async def main():
     )
     try:
         log.info(
-            f"Working directory is [{os.getcwd()}]. Starting {APP_NAME} threads..."
+            "Starting application threads",
+            extra={"app_name": APP_NAME, "working_directory": os.getcwd()},
         )
         event_processor.start()
         data_relay.start()
@@ -127,7 +134,8 @@ async def main():
         env_vars.sort()
         log.setLevel(logging.INFO)
         log.info(
-            f"Startup complete with {len(env_vars)} environment variables visible: {env_vars}."
+            "Startup complete",
+            extra={"env_var_count": len(env_vars), "env_vars": env_vars},
         )
         interruptable_sleep.wait()
     except KeyboardInterrupt:
