@@ -169,9 +169,18 @@ public class AppTest
 
     private static void setExporterProperties(final HttpServer server)
     {
+        // point the trace exporter at the local listener. Signal-specific system
+        // properties win over OTEL_* environment variables, so any OTEL config
+        // inherited from the surrounding environment cannot skew the test.
+        System.setProperty("otel.traces.exporter", "otlp");
         System.setProperty("otel.exporter.otlp.protocol", "http/protobuf");
         System.setProperty("otel.exporter.otlp.endpoint",
             "http://127.0.0.1:" + server.getAddress().getPort());
+        System.setProperty("otel.exporter.otlp.traces.protocol", "http/protobuf");
+        // signal-specific endpoint is used verbatim (no /v1/traces appended),
+        // so include the path the local listener handles
+        System.setProperty("otel.exporter.otlp.traces.endpoint",
+            "http://127.0.0.1:" + server.getAddress().getPort() + "/v1/traces");
         System.setProperty("otel.bsp.schedule.delay", "100");
         // only exercise the trace export path; the metrics/logs exporters would
         // otherwise POST to the local listener and fail with a 404
@@ -181,8 +190,11 @@ public class AppTest
 
     private static void clearExporterProperties()
     {
+        System.clearProperty("otel.traces.exporter");
         System.clearProperty("otel.exporter.otlp.protocol");
         System.clearProperty("otel.exporter.otlp.endpoint");
+        System.clearProperty("otel.exporter.otlp.traces.protocol");
+        System.clearProperty("otel.exporter.otlp.traces.endpoint");
         System.clearProperty("otel.bsp.schedule.delay");
         System.clearProperty("otel.metrics.exporter");
         System.clearProperty("otel.logs.exporter");
