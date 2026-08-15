@@ -62,8 +62,8 @@ $(JAVA_JAR): pom.xml $(JAVA_SOURCES)
 	@java -version
 	@javac -version
 	@mvn -v
-	mvn package
-	mvn dependency:tree
+	mvn --no-transfer-progress package
+	mvn --no-transfer-progress dependency:tree
 
 java: $(JAVA_JAR) ## Build Java artifacts in preparation for container build
 
