@@ -4,11 +4,20 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
+import java.net.InetSocketAddress;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.sun.net.httpserver.HttpServer;
+
+import io.opentelemetry.api.GlobalOpenTelemetry;
+import io.opentelemetry.api.trace.Span;
+import io.opentelemetry.sdk.OpenTelemetrySdk;
 
 import org.ini4j.Ini;
 import org.junit.jupiter.api.Test;
@@ -31,18 +40,135 @@ public class AppTest
     @Test
     public void mainRunsWithoutThrowing() throws InterruptedException
     {
-        final AtomicReference<Throwable> failure = new AtomicReference<>();
-        Thread appThread = new Thread(() -> {
+        // keep telemetry a no-op so the test does not reach for a collector
+        System.setProperty("otel.sdk.disabled", "true");
+        try {
+            final AtomicReference<Throwable> failure = new AtomicReference<>();
+            Thread appThread = new Thread(() -> {
+                try {
+                    App.main(new String[]{});
+                } catch (Throwable t) {
+                    failure.set(t);
+                }
+            }, "app-main");
+            appThread.start();
+            appThread.join(30_000);
+            assertFalse(appThread.isAlive(), "App.main should complete within 30s");
+            assertNull(failure.get(), "App.main threw");
+        } finally {
+            System.clearProperty("otel.sdk.disabled");
+            GlobalOpenTelemetry.resetForTest();
+        }
+    }
+
+    /**
+     * Default behaviour: with telemetry enabled, the auto-configured SDK
+     * produces recording spans with a valid trace context.
+     */
+    @Test
+    public void otelSdkBuildsAndRecordsByDefault()
+    {
+        final OpenTelemetrySdk sdk = OtelSupport.init();
+        try {
+            final Span span = sdk.getTracer("test").spanBuilder("probe").startSpan();
             try {
-                App.main(new String[]{});
-            } catch (Throwable t) {
-                failure.set(t);
+                assertTrue(span.getSpanContext().isValid(), "span context must be valid");
+                assertTrue(span.isRecording(), "span must be recording when SDK is enabled");
+            } finally {
+                span.end();
             }
-        }, "app-main");
-        appThread.start();
-        appThread.join(30_000);
-        assertFalse(appThread.isAlive(), "App.main should complete within 30s");
-        assertNull(failure.get(), "App.main threw");
+        } finally {
+            sdk.close();
+            GlobalOpenTelemetry.resetForTest();
+        }
+    }
+
+    /**
+     * The standard OTEL_SDK_DISABLED kill-switch must suppress export:
+     * nothing may leave the JVM, even though spans are still created.
+     */
+    @Test
+    public void otelSdkDisabledSuppressesExport() throws IOException, InterruptedException
+    {
+        final HttpServer server = startCountingServer();
+        setExporterProperties(server);
+        System.setProperty("otel.sdk.disabled", "true");
+        try {
+            final OpenTelemetrySdk sdk = OtelSupport.init();
+            try {
+                sdk.getTracer("test").spanBuilder("probe").startSpan().end();
+                sdk.getSdkTracerProvider().forceFlush();
+                Thread.sleep(500);
+                assertEquals(0, EXPORT_CALLS.get(), "disabled SDK must not export");
+            } finally {
+                sdk.close();
+            }
+        } finally {
+            clearExporterProperties();
+            System.clearProperty("otel.sdk.disabled");
+            GlobalOpenTelemetry.resetForTest();
+            server.stop(0);
+        }
+    }
+
+    /**
+     * Positive control for the export path: with the SDK enabled and the
+     * endpoint pointed at a local listener, a completed span is exported.
+     */
+    @Test
+    public void otelSdkExportsWhenEnabled() throws IOException, InterruptedException
+    {
+        final HttpServer server = startCountingServer();
+        setExporterProperties(server);
+        try {
+            final OpenTelemetrySdk sdk = OtelSupport.init();
+            try {
+                sdk.getTracer("test").spanBuilder("probe").startSpan().end();
+                sdk.getSdkTracerProvider().forceFlush();
+                final long deadline = System.currentTimeMillis() + 3_000;
+                while (System.currentTimeMillis() < deadline && EXPORT_CALLS.get() == 0) {
+                    Thread.sleep(50);
+                }
+                assertTrue(EXPORT_CALLS.get() > 0, "enabled SDK must export completed spans");
+            } finally {
+                sdk.close();
+            }
+        } finally {
+            clearExporterProperties();
+            GlobalOpenTelemetry.resetForTest();
+            server.stop(0);
+        }
+    }
+
+    private static final AtomicInteger EXPORT_CALLS = new AtomicInteger();
+
+    private static HttpServer startCountingServer() throws IOException
+    {
+        EXPORT_CALLS.set(0);
+        final HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/v1/traces", exchange -> {
+            EXPORT_CALLS.incrementAndGet();
+            exchange.getRequestBody().readAllBytes();
+            exchange.sendResponseHeaders(200, 0);
+            exchange.close();
+        });
+        server.start();
+        return server;
+    }
+
+    private static void setExporterProperties(final HttpServer server)
+    {
+        System.setProperty("otel.exporter.otlp.protocol", "http/protobuf");
+        System.setProperty("otel.exporter.otlp.endpoint",
+            "http://127.0.0.1:" + server.getAddress().getPort());
+        System.setProperty("otel.bsp.schedule.delay", "100");
+    }
+
+    private static void clearExporterProperties()
+    {
+        System.clearProperty("otel.exporter.otlp.protocol");
+        System.clearProperty("otel.exporter.otlp.endpoint");
+        System.clearProperty("otel.bsp.schedule.delay");
     }
 
     /**

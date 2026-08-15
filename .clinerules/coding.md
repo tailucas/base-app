@@ -51,28 +51,23 @@ components orchestrated by supervisord.
 
 - Go and Rust components are optional demo runtimes (`RUN_GO_APP`,
   `RUN_RUST_APP` env switches in `.env`).
-- New Go code MUST use `log/slog` with structured attributes
-  (`slog.Info("event", "key", value)`), never `fmt.Printf`-style logging.
+- New Go code should use `log/slog` with structured attributes
+  (`slog.Info("event", "key", value)`); avoid `fmt.Printf`-style logging
+  for operational output.
 - New Rust code SHOULD use a structured logging facade (`tracing` or `log`)
   instead of `println!` for operational output.
 
 ## 5. Configuration & Environment
 
-- Runtime configuration is `config/app.conf` interpolated at container start
-  by `config_interpol` into `/opt/app/app.conf`; environment comes from
-  `.env` (generated via `dot_env_setup.sh`).
-- Secrets come from 1Password via `Creds` (see pylib). Never hardcode or
-  commit secrets; `.env` values are development defaults only.
-- Key env contract: `APP_NAME`, `DEVICE_NAME`, `WORK_DIR`, `LOG_LEVEL`,
-  optional `SYSLOG_ADDRESS`.
+Configuration, secrets, and the `.env` → `config_interpol` flow are documented
+in `config.md`. The container lifecycle, entrypoint layering, and supervised
+program generation are documented in `container.md`.
 
 ## 6. Build & Run
 
-- Host tooling is devcontainer-based (`make dev`); inside the container use
-  `make build|run|rund|java|python`.
-- `make java` builds the jar; `make python` provisions the uv venv.
-- Docker image build is multi-stage (java builder → runtime); keep the
-  runtime image free of build toolchains.
+The Makefile build graph and the Python/Java/Rust/Go toolchain conventions are
+documented in `build.md`. The Docker multi-stage build and run-as-user
+conventions are documented in `container.md`.
 
 ## 7. Cross-cutting Rules
 

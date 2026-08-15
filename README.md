@@ -13,7 +13,7 @@ This Docker application was created by factoring out many reusable code artifact
 Enough talk! What do I get?
 
 * An Ubuntu-based Docker application specifically designed to act as a Docker base image for derived applications, or can be run standalone. This includes boilerplate entrypoint scripts (`base_entrypoint.sh`, `app_entrypoint.sh`) that can be easily overridden.
-* Multi-language support: Python (with [uv][uv-url] dependency management), Java (Amazon Corretto 25 via SDKMan), and Rust (workspace with `rapp` and `rlib` crates).
+* Multi-language support: Python (with [uv][uv-url] dependency management), Java (Amazon Corretto 26 via SDKMan), and Rust (workspace with `rapp` and `rlib` crates).
 * Powerful threading and inter-thread data handling via [ZeroMQ][zmq-url] with significant resilience to unchecked thread death.
 * Sample [Healthchecks][healthchecks-url] integration with built-in cron job orchestration.
 * Pre-configured process control using [supervisor](http://supervisord.org/).
@@ -35,7 +35,7 @@ The project is organized into multiple language components:
 * Managed dependencies via [uv][uv-url] (see [pyproject.toml](pyproject.toml))
 
 **Java Application** (`src/`)
-* Maven-based build using Java 25 (Amazon Corretto)
+* Maven-based build using Java 26 (Amazon Corretto)
 * Compiled as part of the Docker build into an executable JAR (`app.jar`)
 * Example application in `src/main/java/tailucas/app/App.java`
 
@@ -56,6 +56,25 @@ The sample Python application demonstrates key resilience patterns:
 * Graceful shutdown with signal handling and socket cleanup
 * Configuration and credential management via 1Password Secrets Automation
 
+### OpenTelemetry
+
+Both the Python (`app/`) and Java (`src/`) applications emit all three telemetry signals via OTLP, configured entirely through the standard environment variables — `OTEL_EXPORTER_OTLP_ENDPOINT` (plus `OTEL_EXPORTER_OTLP_PROTOCOL` for `grpc` vs `http/protobuf`), `OTEL_SERVICE_NAME` (sets `service.name`), and `OTEL_RESOURCE_ATTRIBUTES` (e.g. `deployment.environment`). `OTEL_SDK_DISABLED=true` is the kill switch: nothing leaves the process. The Java app uses SDK autoconfigure (`OtelSupport`); the Python app wires the SDK exporters with default constructors (HTTP/protobuf). Both emit the same demo signals at startup — an `otel-demo-startup` span, a `demo_events` counter increment, and a bridged log record.
+
+* **Traces**: each pipeline message forms one trace — `data.generate` (producer) → `data.relay` → `data.process` (consumer) — correlated by the W3C trace ID propagated in the message payload (`traceparent`). `device.name` travels as [baggage](https://opentelemetry.io/docs/concepts/signals/baggage/) and is stamped as a span attribute on downstream stages; exceptions are recorded as span events with error status.
+* **Metrics**: `zmq_recv_duration_seconds` histogram (consumer receive cadence), `zmq_messages_in_flight` up-down counter (pipeline backlog), and a `demo_events` startup counter; exported every 10 seconds.
+* **Logs**: the application logger is bridged to OTEL (Python `LoggingHandler`; log4j2 `OpenTelemetry` appender), so log records emitted inside a span carry `trace_id`/`span_id` for log↔trace correlation in Grafana.
+
+To derive RED (rate/errors/duration) metrics from these traces, add a [spanmetrics connector](https://grafana.com/docs/alloy/latest/reference/components/otelcol/otelcol.connector.spanmetrics/) to your Alloy pipeline, e.g.:
+
+```hcl
+otelcol.connector.spanmetrics "pipeline" {
+  histogram {
+    explicit { buckets = ["1ms", "10ms", "100ms", "1s"] }
+  }
+  output { metrics = [otelcol.exporter.otlp.default.metrics.input] }
+}
+```
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ### Built With
@@ -70,6 +89,9 @@ Technologies that help make this package useful:
 [![Sentry][sentry-shield]][sentry-url]
 [![ZeroMQ][zmq-shield]][zmq-url]
 
+> RabbitMQ is shown above as a *possible* messaging pattern (documented in
+> [`.clinerules/mq.md`](.clinerules/mq.md)), not an active runtime dependency.
+
 Also:
 
 * [Cronitor][cronitor-url]
@@ -79,6 +101,55 @@ Also:
 ![GitHub](https://img.shields.io/static/v1?style=for-the-badge&message=GitHub&color=181717&logo=GitHub&logoColor=FFFFFF&label=)
 
 * [Botoflow][botoflow-url]
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+### Forking & Deriving
+
+This project is a **template**: the [various projects][tailucas-url] that
+derive from it reuse the same skeleton rather than copying bespoke code. The
+canonical, machine-readable guidance for a fork lives in the
+[`.clinerules/`](.clinerules/) directory — this README is the summary; those
+files are the contract. See the [Extension Points](#extension-points) table
+below for the full map.
+
+The key extension seams a fork must understand:
+
+* **Entrypoint layering.** `base_entrypoint.sh` and `base_setup.sh` are the
+  template's contract — do not edit them. `app_entrypoint.sh` and
+  `app_setup.sh` are the fork's override points (shipped as empty stubs). Put
+  your own startup logic there so upstream template changes merge cleanly.
+  See [`.clinerules/container.md`](.clinerules/container.md).
+* **Supervised programs via feature flags.** `config/supervisord.conf` is a
+  sample file with no active programs. `base_entrypoint.sh` appends one
+  `[program:*]` block per enabled runtime, gated by `NO_PYTHON_APP`,
+  `RUN_RUST_APP`, `RUN_JAVA_APP`, `RUN_GO_APP`, and `NO_CRON`. Add your own
+  program the same way — append a guarded block in `app_entrypoint.sh`, never
+  edit the sample file. See [`.clinerules/container.md`](.clinerules/container.md).
+* **Configuration & secrets.** Secrets and configuration are resolved at
+  container start from 1Password Secrets Automation, through `.env`, into
+  interpolated `%(VAR)s` templates. To substitute a different secret store,
+  preserve the same boundary — a `dot_env_setup.sh` that emits `KEY=value`
+  lines and a `cred_tool`-equivalent entry point. See
+  [`.clinerules/config.md`](.clinerules/config.md).
+* **Build graph.** The `Makefile` models artifacts as file targets so repeated
+  invocations skip up-to-date work. Preserve its conventions when adding or
+  removing a runtime. See [`.clinerules/build.md`](.clinerules/build.md).
+
+### Extension Points
+
+Each concern is documented in a dedicated rule file under
+[`.clinerules/`](.clinerules/):
+
+| Concern | Rule file |
+|---|---|
+| Coding standards & posture | [`.clinerules/coding.md`](.clinerules/coding.md) |
+| Container lifecycle & process management | [`.clinerules/container.md`](.clinerules/container.md) |
+| Build system & multi-language toolchains | [`.clinerules/build.md`](.clinerules/build.md) |
+| Configuration & secrets management | [`.clinerules/config.md`](.clinerules/config.md) |
+| Structured logging | [`.clinerules/logging.md`](.clinerules/logging.md) |
+| Messaging (ZeroMQ / RabbitMQ / MQTT) | [`.clinerules/mq.md`](.clinerules/mq.md) |
+| Observability (OpenTelemetry) | [`.clinerules/observability.md`](.clinerules/observability.md) |
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -168,15 +239,15 @@ The project uses a make-based build system:
   - `make run`: Run container in foreground with full output
   - `make rund`: Run container detached in background
   - `make configure`: Generate runtime `.env` file from 1Password secrets
-  - `make java`: Build Java artifacts (requires Java 21+, Maven, and `javac`)
+  - `make java`: Build Java artifacts (requires Java 26+, Maven, and `javac`)
   - `make python`: Initialize Python virtual environment with [uv][uv-url]
   - `make datadir`: Create and configure shared data directory
   - `make dev`: Build and enter the development container (host only)
   - `make check`: Verify required tools are installed
 
 * **[Dockerfile](Dockerfile)**: Multi-stage Docker build
-  - **Builder stage**: Compiles Java artifacts using Maven and Amazon Corretto 25
-  - **Runtime stage**: Ubuntu-based with Java, Python 3.12+, Rust, supervisor, cron, and syslog support
+  - **Builder stage**: Compiles Java artifacts using Maven and Amazon Corretto 26
+  - **Runtime stage**: Ubuntu-based with Java, Python 3.14+, Rust, supervisor, cron, and syslog support
   - User `app` (UID 999) runs the application with appropriate permissions
 
 * **.devcontainer**: VS Code dev container configuration with Docker-out-of-Docker, Python, Java, and Rust support

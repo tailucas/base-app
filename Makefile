@@ -13,7 +13,7 @@ CHECK_USER := vscode
 JAVA_JAR := target/app-0.1.0-jar-with-dependencies.jar
 JAVA_SOURCES := $(shell find src -type f -name '*.java' 2>/dev/null)
 
-.PHONY: help check dev dev-build dev-up datadir python java golang configure build push run rund
+.PHONY: help check dev dev-build dev-up datadir python lint java golang configure build push run rund
 
 # ---------- Dev container (host only) ----------
 
@@ -53,6 +53,10 @@ datadir: data/ ## Set up ./data/ (alias)
 	@touch .venv
 
 python: .venv ## Set up the Python virtual environment (alias)
+
+lint: .venv ## Run ruff and mypy against ./app/
+	uv run ruff check app/
+	uv run mypy app/
 
 $(JAVA_JAR): pom.xml $(JAVA_SOURCES)
 	@java -version

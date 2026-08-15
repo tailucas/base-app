@@ -23,12 +23,15 @@
     <zeromq.version>0.6.0</zeromq.version>
     <slf4j-api.version>2.0.18</slf4j-api.version>
     <log4j.version>2.26.1</log4j.version>
+    <opentelemetry.version>1.65.0</opentelemetry.version>
+    <opentelemetry-instrumentation.version>2.30.0</opentelemetry-instrumentation.version>
 
     <!-- test dependencies -->
     <junit.version>6.1.2</junit.version>
 
     <!-- build toolchain -->
     <maven.assembly.plugin>3.8.0</maven.assembly.plugin>
+    <maven.shade.plugin.version>3.6.2</maven.shade.plugin.version>
     <maven.dependency.plugin.version>3.11.0</maven.dependency.plugin.version>
     <maven.exec.maven.plugin>3.6.3</maven.exec.maven.plugin>
     <maven.enforcer.plugin>3.6.3</maven.enforcer.plugin>
@@ -86,6 +89,48 @@
     </dependency>
 
     <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-api</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-context</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-sdk</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-sdk-logs</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-sdk-extension-autoconfigure</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-exporter-otlp</artifactId>
+    </dependency>
+
+    <!-- runtime-required by sdk-metrics bound instruments (optional upstream) -->
+    <dependency>
+      <groupId>io.opentelemetry</groupId>
+      <artifactId>opentelemetry-api-incubator</artifactId>
+      <version>${opentelemetry.version}-alpha</version>
+    </dependency>
+
+    <dependency>
+      <groupId>io.opentelemetry.instrumentation</groupId>
+      <artifactId>opentelemetry-log4j-appender-2.17</artifactId>
+    </dependency>
+
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
@@ -96,6 +141,27 @@
   <!-- version overrides -->
   <dependencyManagement>
     <dependencies>
+      <dependency>
+        <groupId>io.opentelemetry</groupId>
+        <artifactId>opentelemetry-bom</artifactId>
+        <version>${opentelemetry.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom</artifactId>
+        <version>${opentelemetry-instrumentation.version}</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
+      <dependency>
+        <groupId>io.opentelemetry.instrumentation</groupId>
+        <artifactId>opentelemetry-instrumentation-bom-alpha</artifactId>
+        <version>${opentelemetry-instrumentation.version}-alpha</version>
+        <type>pom</type>
+        <scope>import</scope>
+      </dependency>
       <dependency>
         <groupId>org.slf4j</groupId>
         <artifactId>slf4j-api</artifactId>
@@ -136,6 +202,13 @@
               <configuration>
                 <failOnWarning>true</failOnWarning>
                 <ignoreNonCompile>true</ignoreNonCompile>
+                <!-- these are wired at runtime by SDK autoconfigure, so they are
+                     legitimately absent from compiled code references -->
+                <ignoredUnusedDeclaredDependencies>
+                  <ignoredUnusedDeclaredDependency>io.opentelemetry:opentelemetry-sdk-logs</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>io.opentelemetry:opentelemetry-exporter-otlp</ignoredUnusedDeclaredDependency>
+                  <ignoredUnusedDeclaredDependency>io.opentelemetry:opentelemetry-api-incubator</ignoredUnusedDeclaredDependency>
+                </ignoredUnusedDeclaredDependencies>
               </configuration>
             </execution>
           </executions>
@@ -214,28 +287,35 @@
           </execution>
         </executions>
       </plugin>
+      <!-- shade (not assembly): merges log4j2 plugin caches and OTEL SPI services
+           that a plain jar-with-dependencies would silently clobber -->
       <plugin>
-        <artifactId>maven-assembly-plugin</artifactId>
-        <version>${maven.assembly.plugin}</version>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-shade-plugin</artifactId>
+        <version>${maven.shade.plugin.version}</version>
         <executions>
           <execution>
             <phase>package</phase>
             <goals>
-              <goal>single</goal>
+              <goal>shade</goal>
             </goals>
+            <configuration>
+              <shadedArtifactAttached>true</shadedArtifactAttached>
+              <shadedClassifierName>jar-with-dependencies</shadedClassifierName>
+              <transformers>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                  <resource>META-INF/org/apache/logging/log4j/core/config/plugins/Log4j2Plugins.dat</resource>
+                </transformer>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                <transformer implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                  <manifestEntries>
+                    <Main-Class>${project.mainclass}</Main-Class>
+                  </manifestEntries>
+                </transformer>
+              </transformers>
+            </configuration>
           </execution>
         </executions>
-        <configuration>
-          <archive>
-            <manifest>
-              <addClasspath>true</addClasspath>
-              <mainClass>${project.mainclass}</mainClass>
-            </manifest>
-          </archive>
-          <descriptorRefs>
-            <descriptorRef>jar-with-dependencies</descriptorRef>
-          </descriptorRefs>
-        </configuration>
       </plugin>
     </plugins>
   </build>
