@@ -68,18 +68,29 @@ public class AppTest
     @Test
     public void otelSdkBuildsAndRecordsByDefault()
     {
-        final OpenTelemetrySdk sdk = OtelSupport.init();
+        // keep the SDK recording but prevent it from reaching for a collector:
+        // a default OTLP exporter would attempt to connect to localhost:4317
+        System.setProperty("otel.traces.exporter", "none");
+        System.setProperty("otel.metrics.exporter", "none");
+        System.setProperty("otel.logs.exporter", "none");
         try {
-            final Span span = sdk.getTracer("test").spanBuilder("probe").startSpan();
+            final OpenTelemetrySdk sdk = OtelSupport.init();
             try {
-                assertTrue(span.getSpanContext().isValid(), "span context must be valid");
-                assertTrue(span.isRecording(), "span must be recording when SDK is enabled");
+                final Span span = sdk.getTracer("test").spanBuilder("probe").startSpan();
+                try {
+                    assertTrue(span.getSpanContext().isValid(), "span context must be valid");
+                    assertTrue(span.isRecording(), "span must be recording when SDK is enabled");
+                } finally {
+                    span.end();
+                }
             } finally {
-                span.end();
+                sdk.close();
+                GlobalOpenTelemetry.resetForTest();
             }
         } finally {
-            sdk.close();
-            GlobalOpenTelemetry.resetForTest();
+            System.clearProperty("otel.traces.exporter");
+            System.clearProperty("otel.metrics.exporter");
+            System.clearProperty("otel.logs.exporter");
         }
     }
 
@@ -162,6 +173,10 @@ public class AppTest
         System.setProperty("otel.exporter.otlp.endpoint",
             "http://127.0.0.1:" + server.getAddress().getPort());
         System.setProperty("otel.bsp.schedule.delay", "100");
+        // only exercise the trace export path; the metrics/logs exporters would
+        // otherwise POST to the local listener and fail with a 404
+        System.setProperty("otel.metrics.exporter", "none");
+        System.setProperty("otel.logs.exporter", "none");
     }
 
     private static void clearExporterProperties()
@@ -169,6 +184,8 @@ public class AppTest
         System.clearProperty("otel.exporter.otlp.protocol");
         System.clearProperty("otel.exporter.otlp.endpoint");
         System.clearProperty("otel.bsp.schedule.delay");
+        System.clearProperty("otel.metrics.exporter");
+        System.clearProperty("otel.logs.exporter");
     }
 
     /**
