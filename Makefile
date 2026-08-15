@@ -13,6 +13,9 @@ CHECK_USER := vscode
 JAVA_JAR := target/app-0.1.0-jar-with-dependencies.jar
 JAVA_SOURCES := $(shell find src -type f -name '*.java' 2>/dev/null)
 
+# Docker compose build output verbosity; CI can override, e.g. make build DOCKER_BUILD_PROGRESS=quiet
+DOCKER_BUILD_PROGRESS ?= quiet
+
 .PHONY: help check dev dev-build dev-up datadir python lint java golang configure build push run rund
 
 # ---------- Dev container (host only) ----------
@@ -89,7 +92,7 @@ configure: build .env ## Generate runtime configuration (.env)
 
 build: ## Build the app container image
 	@docker -v
-	docker compose --env-file base.env --progress plain build
+	docker compose --env-file base.env --progress $(DOCKER_BUILD_PROGRESS) build
 
 push: build ## Push the built image to Docker Hub
 	@docker compose images
