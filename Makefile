@@ -13,8 +13,13 @@ CHECK_USER := vscode
 JAVA_JAR := target/app-0.1.0-jar-with-dependencies.jar
 JAVA_SOURCES := $(shell find src -type f -name '*.java' 2>/dev/null)
 
-# Docker compose build output verbosity; CI can override, e.g. make build DOCKER_BUILD_PROGRESS=quiet
+# Docker compose build output verbosity; quiet in CI, normal (auto) elsewhere.
+# Override per invocation, e.g. make build DOCKER_BUILD_PROGRESS=plain
+ifdef GITHUB_ACTIONS
 DOCKER_BUILD_PROGRESS ?= quiet
+else
+DOCKER_BUILD_PROGRESS ?= auto
+endif
 
 .PHONY: help check dev dev-build dev-up datadir python lint java golang configure build push run rund
 
