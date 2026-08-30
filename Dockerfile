@@ -93,25 +93,26 @@ COPY app_entrypoint.sh \
     connect_to_app.sh \
     README.md \
     ./
-# Go
+# Go toolchain (still root)
 COPY go_setup.sh ./
 COPY internal ./internal
-# Rust
-COPY rapp ./rapp
-COPY rlib ./rlib
-COPY rust_setup.sh Cargo.toml Cargo.lock ./
-RUN chown app:app Cargo.lock
-# Python
-COPY app ./app
-COPY python_setup.sh pyproject.toml uv.lock ./
-RUN chown app:app uv.lock
-# Java
-COPY --from=builder "${APP_DIR}/target/app-0.1.0-jar-with-dependencies.jar" ./app.jar
 RUN "${APP_DIR}/go_setup.sh"
+# Java fat jar (root-owned OK for read-only at runtime)
+COPY --from=builder "${APP_DIR}/target/app-0.1.0-jar-with-dependencies.jar" ./app.jar
 # switch to run user now because uv does not use the environment to infer
 USER app
+# Rust toolchain (cached unless rust_setup.sh changes)
+COPY --chown=app:app rust_setup.sh ./
 RUN "${APP_DIR}/rust_setup.sh"
+# Python deps + project (cached unless pyproject/uv.lock/app change)
+COPY --chown=app:app python_setup.sh pyproject.toml ./
+COPY --chown=app:app uv.lock ./
+COPY --chown=app:app app ./app
 RUN "${APP_DIR}/python_setup.sh"
+# Fast source COPYs (no RUN, cheap to invalidate)
+COPY --chown=app:app Cargo.toml Cargo.lock ./
+COPY --chown=app:app rapp ./rapp
+COPY --chown=app:app rlib ./rlib
 # example HTTP backend
 # EXPOSE 8080
 CMD ["/opt/app/entrypoint.sh"]
