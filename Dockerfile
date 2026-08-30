@@ -57,11 +57,10 @@ ENV APP_DIR /opt/app
 # production base image: uv installs main dependencies only (ignore default dependency groups)
 ENV UV_NO_DEFAULT_GROUPS=1
 ENV SDKMAN_DIR="${APP_DIR}/.sdkman"
-RUN curl -s "https://get.sdkman.io?ci=true&rcupdate=false" | bash
-RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 26-amzn"
-ENV JAVA_HOME="$SDKMAN_DIR/candidates/java/current"
-RUN bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install maven"
-ENV PATH "${PATH}:${HOME}/.local/bin:${HOME}/.cargo/bin:${JAVA_HOME}/bin:${SDKMAN_DIR}/candidates/maven/current/bin:/usr/local/go/bin"
+ENV JAVA_HOME="${SDKMAN_DIR}/candidates/java/current"
+ENV PATH "${PATH}:${HOME}/.local/bin:${HOME}/.cargo/bin:${JAVA_HOME}/bin:/usr/local/go/bin"
+# copy SDKMAN + Java + Maven from the builder stage (avoids re-downloading)
+COPY --from=builder "${SDKMAN_DIR}" "${SDKMAN_DIR}"
 # create no-password run-as user
 RUN groupadd -f -r -g 999 app
 # create run-as user
